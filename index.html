@@ -1176,7 +1176,7 @@ const COURSES = [
         "Two things it buys. It shrinks the representation, cutting computation. And it introduces local translation invariance, since the maximum over a region is unchanged by small shifts within that region.",
         "What it costs is precision of location. Every pooling step discards information about exactly where within the region the response occurred.",
         ["aside","A real tension for your work","Classification wants invariance — the type is the same wherever the junction sits. Localization wants the position preserved. Aggressive pooling helps the first and hurts the second, which is why detection and segmentation architectures either pool less, or pool and then upsample with skip connections carrying the fine detail forward."],
-        ["src","Prince, ch. 10.5, <b>Downsampling and upsampling</b>, pp. 185–188."]
+        ["src","Prince, ch. 10.4, <b>Downsampling and upsampling</b>, pp. 185–188."]
       ]},
       {h:"The nonlinearity", body:[
         "Between convolutions sits an activation function, and its necessity is structural rather than incidental.",
@@ -1189,7 +1189,7 @@ const COURSES = [
         "The classical pattern, still the backbone of most vision architectures: alternate convolution and activation, periodically downsample, and let the number of channels grow as spatial dimensions shrink.",
         "That trade is deliberate. Early layers keep high spatial resolution with few channels, because early features are simple and their position matters. Later layers have low spatial resolution and many channels, because late features are complex and abstract and their exact position matters less.",
         "The end of the network depends on the task. Classification flattens or globally pools and attaches a small dense classifier. Detection attaches heads predicting boxes and classes at multiple scales. Segmentation upsamples back to input resolution.",
-        ["src","Elgendy, ch. 3.2–3.4, pp. 123–145. Prince ch. 10.6, <b>Applications</b>, pp. 188–193."]
+        ["src","Elgendy, ch. 3.2–3.4, pp. 123–145. Prince ch. 10.5, <b>Applications</b>, pp. 188–193."]
       ]},
       {h:"Reading note", body:[
         "Elgendy chapter 3 is the most readable full account and it's project-oriented. Prince chapter 10 is the more principled treatment of the same material and worth reading second.",
@@ -1208,7 +1208,7 @@ const COURSES = [
       {q:"What does pooling cost you, and when is that cost unacceptable?",
        prompt:"",
        a:"It discards where within the pooled region the response occurred, trading spatial precision for invariance and reduced computation. That's acceptable for whole-image classification, where the answer shouldn't depend on position. It's a problem for localization tasks — detection and segmentation — where you need to report where something is, and for any task where features are small relative to the pooling extent. Detection and segmentation architectures respond by pooling less, or by upsampling afterward with skip connections that carry high-resolution detail past the bottleneck.",
-       cite:"Prince ch. 10.5, pp. 185–188."},
+       cite:"Prince ch. 10.4, pp. 185–188."},
       {q:"Why does a network need nonlinear activations at all?",
        prompt:"",
        a:"Because composing linear operations yields a linear operation. Without a nonlinearity between layers, a network of any depth collapses mathematically to a single linear transformation, so depth adds parameters but no expressive power. The activation breaks that collapse and is what makes stacking meaningful. ReLU is the common choice because it's cheap and doesn't saturate for positive inputs, avoiding the vanishing gradients that plagued sigmoid-based deep networks; its own failure mode is units that output zero for every input and stop receiving gradient entirely.",
@@ -1330,6 +1330,485 @@ const COURSES = [
        prompt:"",
        a:"Not by asserting it isn't — by showing evidence. Evaluate stratified by solar incidence angle and show performance is stable across the range. Test on acquisitions with illumination geometry absent from training. Check whether incidence correlates with label density in the training set, which would be the mechanism that makes the shortcut available. Inspect what the model responds to via attribution or occlusion. And offer the negative control: performance on tiles with similar illumination but no fractures should be near chance if the model is doing what you claim.",
        cite:"Szeliski ch. 2.2, pp. 92–105, for the physical mechanism."}
+    ]
+  }
+  ]
+},
+
+/* ============================================================
+   COURSE 4 — Vision Stage B
+   Training mechanics, evaluation, modern architectures, detection,
+   attention, and generative models.
+   ============================================================ */
+{
+  id:"vision-b",
+  title:"Modern Architectures",
+  sub:"Stage B — Training, detection, attention, generation",
+  requires:"vision-a",
+  note:"Mostly Prince, with Elgendy carrying detection. Where a book is dated, the lesson says so.",
+  sessions:[
+
+  /* ---------- VB1 ---------- */
+  {
+    id:"b1", n:"Session 1", title:"How Training Actually Works",
+    blurb:"Loss functions from first principles, SGD, momentum, Adam, and backpropagation.",
+    screens:[
+      {h:"Where loss functions come from", body:[
+        "Most treatments hand you a loss function and move on. Prince builds them from one principle instead, and it's worth having because it tells you what to do when the standard losses don't fit.",
+        "The principle is <strong>maximum likelihood</strong>. Decide what probability distribution the model outputs over possible answers. Then choose parameters that make the observed training data as probable as possible under that distribution.",
+        "Everything standard falls out of this. Assume the output is a normal distribution around the prediction and maximizing likelihood gives you squared error. Assume a Bernoulli distribution for a binary outcome and you get binary cross-entropy. Assume a categorical distribution and you get multiclass cross-entropy.",
+        ["src","Prince, ch. 5.1, <b>Maximum likelihood</b>, pp. 70–74, and the recipe at pp. 74–75."]
+      ]},
+      {h:"Why that framing pays", body:[
+        "Two practical consequences.",
+        "It tells you the standard losses are not arbitrary conventions but consequences of distributional assumptions. Squared error assumes symmetric, constant-variance, normally distributed errors. When your errors aren't like that, squared error is the wrong tool and you now know why.",
+        "And it gives you a construction procedure. Faced with an unusual target — a count, an angle, a bounded quantity, a distribution over types — you pick the distribution that fits and derive the loss, instead of guessing among off-the-shelf options.",
+        ["aside","Relevant to junction work","Junction orientation is an angle, and angles wrap. A squared error loss on degrees treats 359 and 1 as maximally different when they're two apart. The distributional framing points you at circular distributions and losses built from them rather than leaving you to discover the problem in your residuals."]
+      ]},
+      {h:"Gradient descent, and why the plain version isn't used", body:[
+        "The plain version computes the gradient over the entire training set, takes one step, repeats. Correct, and impractical: one step requires a full pass over the data.",
+        "<strong>Stochastic gradient descent</strong> estimates the gradient from a small random batch instead. The estimate is noisy, but you get thousands of steps in the time one exact step would take, and the noise turns out to help.",
+        "Why noise helps is worth knowing. A noisy gradient can push the parameters out of a poor local minimum or a saddle point that an exact gradient would sit in. Batch size is therefore a real hyperparameter, not just a memory setting: smaller batches mean noisier gradients and a different optimization trajectory.",
+        ["src","Prince, ch. 6.1–6.2, pp. 91–100."]
+      ]},
+      {h:"Momentum and Adam", body:[
+        "Two refinements you use constantly and should be able to explain.",
+        "<strong>Momentum</strong> accumulates a running average of recent gradients and steps in that direction rather than the current gradient alone. The effect is a ball rolling downhill: it builds speed along consistently downhill directions and damps oscillation across a narrow valley, which is the classic slow case for plain SGD.",
+        "<strong>Adam</strong> adds per-parameter step sizes. It tracks both an average of recent gradients and an average of their squared magnitudes, then scales each parameter's step by the inverse of its typical gradient size. Parameters with consistently small gradients get larger steps and vice versa.",
+        "The practical result is that Adam is far less sensitive to the initial learning rate, which is why it's the default. The tradeoff, occasionally raised, is that SGD with momentum sometimes generalizes slightly better on vision tasks despite converging more slowly.",
+        ["src","Prince, ch. 6.3, <b>Momentum</b>, pp. 100–102; ch. 6.4, <b>Adam</b>, pp. 102–105."]
+      ]},
+      {h:"Backpropagation, plainly", body:[
+        "Training needs the gradient of the loss with respect to every parameter, and a large network has millions. Computing each independently would be impossibly slow.",
+        "Backpropagation is the observation that you can compute all of them in roughly the cost of two forward passes, by working backward from the loss and reusing intermediate results.",
+        "The mechanism is the chain rule applied systematically. Each layer receives, from the layer above, how much the loss changes with respect to that layer's output. From that it computes two things: how much the loss changes with respect to its own parameters, and how much it changes with respect to its input, which is what it hands to the layer below.",
+        "The reuse is the whole trick. A quantity computed once at layer twelve serves every parameter in layers one through twelve.",
+        ["src","Prince, ch. 7.3–7.4, pp. 114–121. Starmer ch. 2, printed pp. 29–78, is the gentlest walkthrough."]
+      ]},
+      {h:"Why initialization matters", body:[
+        "A detail that looks minor and isn't.",
+        "If initial weights are too small, activations shrink layer by layer until the signal reaching deep layers is negligible, and so are the gradients coming back. If too large, they grow and the network saturates or diverges.",
+        "The standard schemes set the initial scale based on the number of inputs to each layer, so the variance of activations stays roughly constant through depth. He initialization for ReLU networks is the common one.",
+        "This is why very deep networks were hard to train before it was understood, and it's the same underlying problem that residual connections address from a different angle.",
+        ["src","Prince, ch. 7.5, <b>Parameter initialization</b>, pp. 121–125."]
+      ]},
+      {h:"Reading note", body:[
+        "Prince chapters 5, 6, and 7, pp. 70–131. These three do the work of most of a semester.",
+        "If any of it feels abstract, Starmer chapter 2 covers backpropagation with the illustrated treatment and Elgendy 2.7, pp. 107–111, gives a shorter version."
+      ]}
+    ],
+    questions:[
+      {q:"Where does squared error loss come from? Don't just say it measures distance.",
+       prompt:"",
+       a:"From maximum likelihood under an assumed normal distribution. If you model the output as normally distributed around the prediction with constant variance, then maximizing the probability of the observed data is equivalent to minimizing the sum of squared differences — the exponential in the Gaussian density becomes a sum of squares once you take logs. That's why it's the default and also why it's wrong when the assumption fails: asymmetric errors, heavy tails, bounded or wrapping targets each imply a different distribution and therefore a different loss.",
+       cite:"Prince ch. 5.1–5.3, pp. 70–78."},
+      {q:"Why is stochastic gradient descent better than exact gradient descent, beyond being faster per step?",
+       prompt:"",
+       a:"The noise itself helps. An exact gradient at a saddle point or shallow local minimum is near zero, so exact descent stalls there; a noisy estimate from a small batch can push the parameters out. The noise also acts as a mild regularizer, biasing the optimizer toward flatter minima that tend to generalize better. This makes batch size a genuine hyperparameter rather than a memory setting — smaller batches mean noisier gradients and a materially different trajectory, not just a slower one.",
+       cite:"Prince ch. 6.2, pp. 97–100."},
+      {q:"Explain what Adam does differently from plain SGD.",
+       prompt:"",
+       a:"Two additions. It keeps a running average of recent gradients, so steps follow accumulated direction rather than the instantaneous gradient, damping oscillation. And it keeps a running average of squared gradient magnitudes per parameter, using it to scale each parameter's step individually — parameters with habitually small gradients get proportionally larger steps. The practical benefit is robustness to the initial learning rate, which is why it's the default. The counterpoint is that SGD with momentum sometimes generalizes slightly better on vision tasks despite slower convergence.",
+       cite:"Prince ch. 6.3–6.4, pp. 100–105."},
+      {q:"Why is backpropagation efficient? What would the naive alternative cost?",
+       prompt:"",
+       a:"The naive approach — perturbing each parameter and measuring the loss change — costs one forward pass per parameter, so millions of passes per update. Backpropagation computes all gradients in about the cost of two forward passes by applying the chain rule backward and reusing intermediates: the derivative of the loss with respect to a deep layer's output is computed once and reused for every parameter feeding into it. The efficiency comes entirely from that reuse, not from any approximation — the gradients are exact.",
+       cite:"Prince ch. 7.3–7.4, pp. 114–121."},
+      {q:"Why does weight initialization matter, and what goes wrong at each extreme?",
+       prompt:"",
+       a:"It sets the scale of activations and gradients as they propagate through depth. Too small and activations shrink layer by layer until deep layers see negligible signal and receive negligible gradient, so they barely train. Too large and activations grow, pushing units into saturation or causing divergence. Standard schemes scale the initial variance by the number of inputs per layer to keep activation variance roughly constant with depth — He initialization for ReLU networks. It's a large part of why very deep networks were impractical before this was understood.",
+       cite:"Prince ch. 7.5, pp. 121–125."}
+    ]
+  },
+
+  /* ---------- VB2 ---------- */
+  {
+    id:"b2", n:"Session 2", title:"Measuring Performance Properly",
+    blurb:"Sources of error, the bias-variance picture, and why double descent broke it.",
+    screens:[
+      {h:"Three sources of error", body:[
+        "Prince decomposes model error into three parts, and keeping them distinct tells you what to do about a disappointing result.",
+        "<strong>Noise.</strong> Irreducible. The mapping from input to output isn't deterministic, whether because of measurement error, label ambiguity, or genuine stochasticity. No model removes this and no amount of data helps.",
+        "<strong>Bias.</strong> The model class can't represent the true function. A straight line fitting curved data has bias regardless of how much data you supply.",
+        "<strong>Variance.</strong> The fitted model depends on which particular training sample you drew. Train on a different sample and get a meaningfully different model.",
+        ["src","Prince, ch. 8.2, <b>Sources of error</b>, pp. 134–138."]
+      ]},
+      {h:"Why the split is actionable", body:[
+        "Each source has a different remedy, and applying the wrong one wastes months.",
+        "High bias means the model is too simple. More data will not help. You need a richer model class or better features.",
+        "High variance means the model is too sensitive to the sample. A larger model will make it worse. You need more data, stronger regularization, or a simpler model.",
+        "Noise means you've hit the ceiling. Further effort on the model is wasted; the returns are in better labels or better measurement.",
+        "Diagnosing which you have is straightforward: compare training and validation error. Both high means bias. Training low and validation much higher means variance. Both near the known noise floor means done.",
+        ["aside","Connects to Stage A","This is why inter-annotator agreement matters. It estimates the noise floor, and without it you can't tell whether remaining error is fixable."]
+      ]},
+      {h:"The classical picture, and its limits", body:[
+        "The textbook story says bias and variance trade off. Increase model complexity and bias falls while variance rises; total error follows a U shape with an optimum in the middle. Choose the model at the bottom of the U.",
+        "That story is right for classical models and it does not describe modern deep networks, which is a genuinely important thing to know."
+      ]},
+      {h:"Double descent", body:[
+        "What actually happens with very large models: as you increase capacity, test error follows the classical U at first, rising as the model begins to overfit. Then, past the point where the model has enough capacity to fit the training data exactly, test error <em>falls again</em>, sometimes below the classical optimum.",
+        "Hence double descent, two descending regions with a peak between them.",
+        "The peak sits near the interpolation threshold, where the model has just barely enough capacity to fit the training data. There it's forced into a single, brittle solution. With more capacity there are many solutions that fit the data, and gradient descent tends to select smooth ones among them.",
+        "The practical upshot contradicts the classical advice: with modern networks, a model in the awkward middle can be worse than one substantially larger. \"Reduce capacity to avoid overfitting\" is not reliably correct anymore.",
+        ["src","Prince, ch. 8.4, <b>Double descent</b>, pp. 141–146, and ch. 20, <b>Why does deep learning work?</b>, pp. 415–433."]
+      ]},
+      {h:"Choosing hyperparameters", body:[
+        "Practical points that follow from the discipline in Stage A.",
+        "Hyperparameter search is a training activity and must use validation data, never test. Every configuration you compare consumes some of the validation set's independence, which is why a final test number can still be optimistic if you searched very hard.",
+        "Random search generally beats grid search on the same budget, because most hyperparameters barely matter and grid search wastes its budget sampling the unimportant ones at many values while covering the important ones sparsely.",
+        "With small datasets, cross-validation gives a more stable estimate than a single split, at the cost of training multiple times. The same independence rules apply to the folds: for spatially structured data, fold assignment must respect the independent unit.",
+        ["src","Prince, ch. 8.5, <b>Choosing hyperparameters</b>, pp. 146–147."]
+      ]},
+      {h:"Reading note", body:[
+        "Prince chapter 8, pp. 132–151, is short and the highest-value chapter in the book for interviews.",
+        "Chapter 20, pp. 415–433, is the honest discussion of what's still unexplained about why any of this works. Read it for the intellectual humility as much as the content."
+      ]}
+    ],
+    questions:[
+      {q:"Break down the sources of model error and say what you'd do about each.",
+       prompt:"",
+       a:"Noise is irreducible — the input doesn't determine the output, because of measurement error, label ambiguity, or real stochasticity. The response is better labels or better measurement, not modeling. Bias is the model class being unable to represent the true function; more data won't help, you need a richer class or better features. Variance is sensitivity to the particular training sample; a bigger model makes it worse, so the answer is more data, regularization, or simplification. Diagnose by comparing training and validation error: both high means bias, a large gap means variance.",
+       cite:"Prince ch. 8.2–8.3, pp. 134–141."},
+      {q:"What is double descent, and why does it matter for how you choose model size?",
+       prompt:"An interviewer asking this is checking whether your knowledge is current.",
+       a:"As capacity increases, test error first follows the classical U — improving, then worsening as overfitting sets in — but past the interpolation threshold, where the model can exactly fit the training data, it descends again, sometimes below the classical optimum. The peak sits at the threshold, where the model has just enough capacity for exactly one brittle solution; beyond it, many solutions fit and gradient descent tends to pick smooth ones. It matters because the classical advice to shrink a model to avoid overfitting can land you on the peak, making a substantially larger model the better choice.",
+       cite:"Prince ch. 8.4, pp. 141–146."},
+      {q:"Why does random hyperparameter search usually beat grid search?",
+       prompt:"",
+       a:"Because hyperparameters differ enormously in importance and you don't know in advance which matter. A grid spends its budget evaluating every parameter at the same few values, so with two important and four unimportant parameters most of the trials differ only in ways that don't affect the outcome, and the important ones get sampled coarsely. Random search samples every parameter at a distinct value each trial, so the important dimensions get as many distinct values as you have trials. The advantage grows with the number of irrelevant parameters.",
+       cite:"Prince ch. 8.5, pp. 146–147."},
+      {q:"Your training and validation errors are both high and roughly equal. What now?",
+       prompt:"",
+       a:"That's a bias signature, not overfitting — the model can't represent the pattern. More data won't help and regularization would make it worse. The moves are a higher-capacity model, better features or representation, longer training if it hasn't converged, or a check that the learning rate isn't preventing convergence. Before any of that, verify the error isn't just the noise floor: if inter-annotator agreement puts the ceiling near your current error, the model is already as good as the labels permit and the work belongs in the labeling.",
+       cite:"Prince ch. 8.2–8.3, pp. 134–141."}
+    ]
+  },
+
+  /* ---------- VB3 ---------- */
+  {
+    id:"b3", n:"Session 3", title:"Regularization and What Actually Helps",
+    blurb:"Explicit, implicit, and the heuristics that do the real work.",
+    screens:[
+      {h:"Two kinds", body:[
+        "<strong>Explicit regularization</strong> adds a term to the loss that penalizes complexity. L2 penalizes squared parameter magnitude and shrinks everything smoothly; L1 penalizes absolute magnitude and drives some parameters to exactly zero.",
+        "<strong>Implicit regularization</strong> is the constraining effect of the optimization procedure itself, with nothing added to the loss. Stochastic gradient descent doesn't explore all solutions that fit the training data — the noise in its updates biases it toward flatter minima, which tend to generalize better.",
+        "That second category is underappreciated and it explains something otherwise puzzling: networks with far more parameters than training examples, which classical theory says should overfit catastrophically, often generalize well. Part of the answer is that SGD never visits most of the overfitting solutions.",
+        ["src","Prince, ch. 9.1–9.2, pp. 152–158."]
+      ]},
+      {h:"Early stopping", body:[
+        "Train, watch validation error, stop when it starts rising rather than when training error bottoms out.",
+        "It functions as regularization because model complexity effectively grows during training. Early in training the parameters are near their small initial values and the function is relatively simple. Stopping early keeps it there.",
+        "The catch is that it consumes validation data. If you stop based on validation error and later report validation performance, that number is optimistic — the stopping decision used it.",
+        ["src","Prince, ch. 9.3, within pp. 158–168."]
+      ]},
+      {h:"Dropout", body:[
+        "During training, randomly zero out a fraction of units on each forward pass. At test time use all units, scaled appropriately.",
+        "The reason it works: a unit can't rely on any particular other unit being present, so the network can't build fragile co-adapted chains where several units only function together. Each unit has to be independently useful.",
+        "A second framing: dropout approximately trains an ensemble of many subnetworks sharing weights, and averages them at test time.",
+        "Worth knowing that dropout has fallen out of favor in convolutional layers specifically, where batch normalization and data augmentation generally do more. It remains common in dense layers.",
+        ["src","Elgendy, ch. 3.5, <b>Adding dropout layers</b>, pp. 145–149; Prince ch. 9.3, pp. 158–168."]
+      ]},
+      {h:"Batch normalization", body:[
+        "Normalize the activations within each layer across the batch, then rescale with learned parameters.",
+        "It was originally justified as reducing internal covariate shift, the changing distribution of layer inputs during training. That explanation has been substantially challenged; the current view is that it mainly smooths the optimization landscape, permitting higher learning rates and faster convergence.",
+        "Being able to say that the original explanation is disputed is a small but real signal of currency in an interview.",
+        "The practical caveat: batch norm's behavior depends on batch composition during training and on accumulated statistics at test time. Small batches make the estimates noisy, and a train-test mismatch in those statistics is a real source of deployment surprises.",
+        ["src","Prince, ch. 11.4, <b>Batch normalization</b>, pp. 206–209; Elgendy ch. 4.9, pp. 202–206."]
+      ]},
+      {h:"What actually helps most", body:[
+        "Prince groups a set of heuristics together, and the ordering is worth internalizing because it contradicts where attention usually goes.",
+        "More data beats every regularizer. Augmentation, which manufactures a constrained version of more data, comes next. Transfer learning from a large pretrained model is often worth more than any architectural adjustment. Ensembling several models reliably improves results at linear cost.",
+        "Explicit L1 and L2 penalties, which get the most textbook space, are usually among the smaller effects in modern vision work.",
+        ["aside","The honest framing for interviews","If asked how you'd improve a model, leading with L2 tuning signals a textbook understanding. Leading with data quantity, label quality, augmentation matched to real invariances, and pretraining signals you've actually done this."],
+        ["src","Prince, ch. 9.3, <b>Heuristics to improve performance</b>, pp. 158–168."]
+      ]},
+      {h:"Reading note", body:[
+        "Prince chapter 9, pp. 152–174. Elgendy 4.8 and 4.9, pp. 198–206, for the applied version with code."
+      ]}
+    ],
+    questions:[
+      {q:"What's implicit regularization, and why does it matter for understanding why big networks work?",
+       prompt:"",
+       a:"It's the constraining effect of the optimization procedure itself, with nothing added to the loss. SGD's noisy updates bias it toward flat minima rather than sharp ones, and flat minima tend to generalize better. It matters because classical theory predicts that networks with far more parameters than training examples should overfit catastrophically, and they often don't. Part of the resolution is that among the many parameter settings fitting the training data, SGD never visits most of the badly-generalizing ones — the search procedure, not the model class, does the constraining.",
+       cite:"Prince ch. 9.2, pp. 155–158."},
+      {q:"Why does dropout work?",
+       prompt:"",
+       a:"By randomly zeroing units during training, it prevents any unit from depending on a specific other unit being present, so the network can't build fragile co-adapted chains that only function as a group. Each unit must be independently useful. An equivalent framing is that it approximately trains an ensemble of subnetworks sharing weights and averages them at test time. Worth noting it's fallen out of favor in convolutional layers, where batch normalization and augmentation generally contribute more, though it remains common in dense layers.",
+       cite:"Elgendy ch. 3.5, pp. 145–149."},
+      {q:"What does batch normalization actually do? Be careful with the standard explanation.",
+       prompt:"",
+       a:"It normalizes activations within a layer across the batch, then rescales with learned parameters. The original justification was reducing internal covariate shift — the shifting distribution of layer inputs during training — but that explanation has been substantially challenged, and the prevailing view is that it mainly smooths the optimization landscape, enabling higher learning rates and faster convergence. Practically, its behavior depends on batch statistics at training time and accumulated statistics at inference, so small batches give noisy estimates and train-test mismatch is a real deployment hazard.",
+       cite:"Prince ch. 11.4, pp. 206–209."},
+      {q:"You have a model that overfits. Rank your interventions.",
+       prompt:"An interviewer is checking whether you've done this or only read about it.",
+       a:"More data first — it dominates every other intervention when obtainable. Then augmentation matched to genuine invariances of the domain, which is constrained synthetic data. Then transfer learning from a large pretrained model, often worth more than any architectural change. Then early stopping and dropout, which are cheap. Explicit L1 and L2 penalties last: they get the most textbook space and usually deliver the smallest effect in modern vision. Before any of it, I'd check the split for leakage, since apparent overfitting sometimes turns out to be a broken evaluation.",
+       cite:"Prince ch. 9.3, pp. 158–168."}
+    ]
+  },
+
+  /* ---------- VB4 ---------- */
+  {
+    id:"b4", n:"Session 4", title:"Residual Networks and Transfer Learning",
+    blurb:"Why depth became trainable, and why you should almost never train from scratch.",
+    screens:[
+      {h:"The problem residuals solved", body:[
+        "Before residual connections, adding layers past a certain depth made networks worse — worse on training data, not just validation. That's the diagnostic detail: it wasn't overfitting, it was an optimization failure.",
+        "The mechanism is degradation of the gradient signal. Backpropagation multiplies gradients through each layer on the way back, and across many layers those factors compound, shrinking toward zero or blowing up.",
+        "There's also a logical oddity: a deeper network can always represent whatever a shallower one does, by making the extra layers identity mappings. So a deeper network doing worse means the optimizer can't find a solution that provably exists.",
+        ["src","Prince, ch. 11.1, <b>Sequential processing</b>, pp. 200–203."]
+      ]},
+      {h:"The fix", body:[
+        "A <strong>residual connection</strong> adds a layer's input to its output, so the layer computes a modification to its input rather than a complete replacement.",
+        "Two things follow. Identity becomes the default — if a block's weights are near zero, it passes its input through unchanged, so extra depth costs nothing rather than actively hurting. And gradients get a direct path backward through the addition, bypassing the multiplication chain, so deep layers receive usable signal.",
+        "This is why networks went from tens of layers to hundreds. It's one of the highest-leverage architectural ideas in the field and it's remarkably simple once stated.",
+        ["src","Prince, ch. 11.2, <b>Residual connections and residual blocks</b>, pp. 203–206. Elgendy ch. 5.6, <b>ResNet</b>, pp. 251–260."]
+      ]},
+      {h:"The architecture lineage", body:[
+        "Worth knowing as a sequence of ideas rather than a list of names.",
+        "<strong>LeNet-5</strong> established the convolution-pooling-dense pattern. <strong>AlexNet</strong> showed it scaled to hard problems with GPUs and ReLU. <strong>VGGNet</strong> demonstrated that stacking small 3×3 kernels beat larger ones. <strong>Inception</strong> ran multiple kernel sizes in parallel within a block, letting the network use several scales at once. <strong>ResNet</strong> added residual connections and unlocked real depth.",
+        "Each addressed a specific limitation of what came before. Being able to say what each solved, rather than reciting the order, is what an interviewer is listening for.",
+        ["src","Elgendy, ch. 5, <b>Advanced CNN architectures</b>, pp. 216–260: LeNet p. 220, AlexNet p. 224, VGG p. 233, Inception p. 238, ResNet p. 251."]
+      ]},
+      {h:"Transfer learning", body:[
+        "The single highest-leverage practice in applied vision, and the reason a small team can build a good detector.",
+        "The observation: the early and middle layers of a network trained on a large general dataset learn features that are broadly useful — edges, textures, shapes — not specific to the original task. Those layers are worth far more than the labeled data you can collect for your own problem.",
+        "So instead of starting from random weights, start from a network trained on ImageNet or similar, and adapt it.",
+        ["src","Elgendy, ch. 6, <b>Transfer learning</b>, pp. 261–303."]
+      ]},
+      {h:"Three ways to do it", body:[
+        "<strong>Feature extraction.</strong> Freeze the pretrained network entirely, replace the final classifier, train only that. Fast, needs little data, works when your domain resembles the source.",
+        "<strong>Fine-tuning.</strong> Unfreeze some or all layers and continue training at a low learning rate. Needs more data, adapts better to a different domain.",
+        "<strong>Partial fine-tuning.</strong> Freeze early layers, train later ones. Early layers hold generic features that transfer well; later layers hold task-specific ones that don't.",
+        "The choice depends on two things: how much labeled data you have, and how far your domain is from the source. Little data and a similar domain means feature extraction. Plenty of data and a distant domain means fine-tune broadly.",
+        ["aside","Your case specifically","Orbital grayscale imagery of Martian terrain is a long way from ImageNet photographs. That argues for fine-tuning more of the network than a typical transfer recipe suggests, and it's a legitimate question whether ImageNet pretraining helps as much here as it does for natural images. Being able to discuss that tradeoff, rather than treating pretraining as automatic, is the applied-scientist version of this answer."],
+        ["src","Elgendy, ch. 6.4–6.5, pp. 275–283."]
+      ]},
+      {h:"Reading note", body:[
+        "Prince chapter 11, pp. 200–220, for residuals and batch norm. Elgendy chapters 5 and 6, pp. 216–303, for architectures and transfer learning with worked projects.",
+        "Elgendy is from 2020, so his architecture survey stops before vision transformers. Session 6 covers what came after."
+      ]}
+    ],
+    questions:[
+      {q:"Why did adding layers make networks worse before residual connections?",
+       prompt:"The key detail is which error got worse.",
+       a:"Training error got worse, not just validation error, so it was an optimization failure rather than overfitting. Gradients are multiplied through each layer during backpropagation, and across many layers those factors compound toward zero or explode, so deep layers receive unusable signal. The logical oddity is that a deeper network can always represent what a shallower one does by making extra layers identity mappings — so worse training performance means the optimizer couldn't find a solution known to exist. Residual connections make identity the default and give gradients a direct path backward.",
+       cite:"Prince ch. 11.1–11.2, pp. 200–206."},
+      {q:"Explain a residual connection and why it helps, in two sentences.",
+       prompt:"",
+       a:"A residual connection adds a block's input to its output, so the block learns a modification to its input rather than an entire replacement. That makes the identity mapping the default when weights are near zero, so extra depth can't hurt, and it gives gradients a direct route backward through the addition that bypasses the multiplication chain causing degradation.",
+       cite:"Prince ch. 11.2, pp. 203–206."},
+      {q:"When would you use feature extraction versus full fine-tuning?",
+       prompt:"",
+       a:"It's governed by two variables: how much labeled data you have and how far your domain sits from the pretraining source. Little data and a similar domain favors freezing the backbone and training only a new head — few parameters, low overfitting risk. Plenty of data and a distant domain favors unfreezing broadly at a low learning rate, since the pretrained features weren't learned on anything resembling your inputs. The middle case is freezing early layers, which hold generic edges and textures that transfer well, and training later layers, which hold task-specific structure that doesn't.",
+       cite:"Elgendy ch. 6.4–6.5, pp. 275–283."},
+      {q:"Does ImageNet pretraining help for grayscale orbital imagery? Argue both sides.",
+       prompt:"There's no settled answer — the point is whether you can reason about it.",
+       a:"For: early-layer features are edges, gradients, and textures, which are generic across imaging modalities, and pretrained initialization improves optimization even when the domains differ. Against: ImageNet is color photographs of objects with characteristic scale, perspective, and object-centric composition, none of which describe nadir-viewing grayscale terrain; later layers encode object semantics that are irrelevant, and the three-channel input forces an awkward adaptation. The empirical answer is a run you can actually do — train from scratch, feature-extract, and fine-tune, and compare. The defensible position is that it usually helps but less than for natural images, and that it should be tested rather than assumed.",
+       cite:"Elgendy ch. 6.1–6.3, pp. 262–275."}
+    ]
+  },
+
+  /* ---------- VB5 ---------- */
+  {
+    id:"b5", n:"Session 5", title:"Object Detection",
+    blurb:"From classification to localization — R-CNN, SSD, YOLO, and what came after.",
+    screens:[
+      {h:"Why detection is harder than classification", body:[
+        "Classification answers one question per image: what is this? Detection answers a variable number: what things are here, and where is each one?",
+        "That variability is the structural difficulty. A network outputs a fixed-size tensor, but an image might contain zero objects or four hundred. Every detection architecture is, at bottom, a scheme for reconciling fixed output with variable content.",
+        "The second difficulty is the imbalance from Stage A: most candidate locations are background, by orders of magnitude.",
+        ["src","Elgendy, ch. 7.1, <b>General object detection framework</b>, pp. 306–313."]
+      ]},
+      {h:"The two-stage approach", body:[
+        "The R-CNN family solves it by splitting the problem.",
+        "Stage one proposes regions that might contain something, using a general objectness notion rather than class-specific detection. Stage two classifies each proposal and refines its box.",
+        "The original R-CNN generated proposals externally and ran the network separately on each, which was extremely slow. Fast R-CNN ran the network once over the whole image and pooled features per proposal. Faster R-CNN made proposal generation itself a network, so the whole thing trains end to end.",
+        "That progression is a good illustration of a general pattern: an expensive external component gets absorbed into the network and learned.",
+        ["src","Elgendy, ch. 7.2, <b>Region-based CNNs</b>, pp. 313–331."]
+      ]},
+      {h:"The single-stage approach", body:[
+        "SSD and YOLO skip proposals. They divide the image into a grid and, at each cell, directly predict boxes and class scores.",
+        "The tradeoff is the classic one: single-stage is much faster, historically at some accuracy cost, particularly on small objects. Two-stage is more accurate and slower. The gap has narrowed considerably since Elgendy wrote.",
+        "For real-time applications — the wildfire detection work you were looking at is exactly this — single-stage is usually the choice, because a detector that can't keep up with the camera feed isn't useful regardless of its accuracy.",
+        ["src","Elgendy, ch. 7.3, <b>SSD</b>, pp. 331–341; ch. 7.4, <b>YOLO</b>, pp. 341–347."]
+      ]},
+      {h:"Anchors, and the tuning nobody mentions", body:[
+        "Both families use <strong>anchor boxes</strong>: predefined boxes of various sizes and aspect ratios at each location. The network predicts adjustments to these rather than boxes from nothing, which is a much easier learning problem.",
+        "The consequence is a hyperparameter set people forget about. Anchor sizes and aspect ratios must match the objects you're actually detecting. Defaults are tuned for datasets of everyday objects with a particular size distribution, and if your targets are much smaller or differently shaped, default anchors will systematically miss them.",
+        ["aside","A concrete failure","Junction features occupying a handful of pixels are far smaller than typical COCO objects. Default anchor configurations may have no box small enough to match them well, producing poor recall that looks like a model problem and is actually a configuration problem."]
+      ]},
+      {h:"Non-maximum suppression", body:[
+        "A detector produces many overlapping boxes for one object. <strong>Non-maximum suppression</strong> cleans up: keep the highest-scoring box, discard any box overlapping it beyond a threshold, repeat.",
+        "It's post-processing, not learned, and its threshold is a real parameter. Too aggressive and genuinely distinct nearby objects get merged. Too permissive and you keep duplicates.",
+        "For densely packed features — a fracture network with many junctions close together — NMS threshold is a first-order concern rather than a detail, since adjacent true detections may overlap more than the default assumes.",
+        ["src","Elgendy, ch. 7.1, within pp. 306–313. Szeliski ch. 6.3, <b>Object detection</b>, pp. 396–411, for a broader survey."]
+      ]},
+      {h:"Evaluating a detector", body:[
+        "Detection metrics differ from classification metrics and the vocabulary comes up constantly.",
+        "<strong>Intersection over Union</strong> measures box overlap: the area of intersection divided by the area of union. A prediction counts as correct if its IoU with a ground-truth box exceeds a threshold, commonly 0.5.",
+        "<strong>Average Precision</strong> is the area under the precision-recall curve for one class, and <strong>mAP</strong> averages that across classes. Modern practice averages over multiple IoU thresholds rather than fixing 0.5.",
+        "The thing to remember is that mAP hides the same tradeoffs as any single number. Two detectors with identical mAP can behave completely differently — one missing small objects, another producing many false positives on background — and which is preferable depends entirely on the deployment cost of each error.",
+        ["src","Elgendy, ch. 7.1, pp. 306–313; ch. 4.1 on metrics, pp. 167–170."]
+      ]},
+      {h:"What Elgendy predates", body:[
+        "The book is from 2020, so a note on what came after, because an interviewer may raise it.",
+        "<strong>DETR</strong> reframed detection as set prediction using a transformer, removing anchors and NMS entirely. <strong>Vision transformers</strong> replaced convolutional backbones in many detection systems. <strong>Segment Anything</strong> and similar foundation models changed what's achievable with limited labels.",
+        "The core ideas in Elgendy still hold and remain the vocabulary people use. But claiming YOLO and Faster R-CNN as the state of the art would date you, and knowing what superseded them is cheap insurance."
+      ]}
+    ],
+    questions:[
+      {q:"What makes detection structurally harder than classification?",
+       prompt:"",
+       a:"The output size varies with the content. Classification produces one fixed-length answer per image; detection must report an unknown number of objects with locations, from zero to hundreds, while the network emits a fixed-size tensor. Every detection architecture is a scheme for reconciling that — proposals in two-stage methods, grid cells with anchors in single-stage, set prediction in DETR. The second difficulty is structural class imbalance, since the overwhelming majority of candidate locations contain no object, which swamps the loss without specific countermeasures.",
+       cite:"Elgendy ch. 7.1, pp. 306–313."},
+      {q:"Compare two-stage and single-stage detectors.",
+       prompt:"",
+       a:"Two-stage methods like Faster R-CNN first propose candidate regions, then classify and refine each, which concentrates effort on promising areas and historically gave better accuracy, especially on small objects. Single-stage methods like SSD and YOLO predict boxes and classes directly over a grid in one pass, which is substantially faster and simpler to deploy. The classical framing is accuracy versus speed, though the gap has narrowed since 2020. For real-time applications the single-stage family usually wins, since a detector that can't keep pace with the input stream is unusable at any accuracy.",
+       cite:"Elgendy ch. 7.2–7.4, pp. 313–347."},
+      {q:"What are anchor boxes and how can they silently hurt you?",
+       prompt:"",
+       a:"Anchors are predefined boxes of set sizes and aspect ratios placed at each location; the network predicts offsets from them rather than boxes from scratch, which is an easier regression problem. They hurt silently when their size and shape distribution doesn't match your targets — default configurations are tuned for everyday-object datasets, so unusually small or differently shaped targets may have no well-matching anchor. Recall suffers in a way that looks like a model capacity problem and is actually a configuration problem, and it won't announce itself in the loss.",
+       cite:"Elgendy ch. 7.3, pp. 331–341."},
+      {q:"Why might non-maximum suppression be a first-order concern for densely packed features?",
+       prompt:"",
+       a:"NMS discards boxes overlapping a higher-scoring one beyond an IoU threshold, assuming heavy overlap means duplicate detections of one object. When true objects sit close together — junctions in a dense fracture network — genuinely distinct detections can overlap more than the default threshold allows, so NMS deletes real positives. Recall drops for exactly the dense regions that may be most scientifically interesting, and nothing in the training loss reflects it because NMS is unlearned post-processing. The threshold has to be tuned against the actual spacing of your targets.",
+       cite:"Elgendy ch. 7.1, pp. 306–313."},
+      {q:"Two detectors have the same mAP. What questions do you ask before choosing?",
+       prompt:"",
+       a:"How performance breaks down by object size, since mAP averages over a size distribution and one detector may be failing entirely on small objects. The precision-recall shape, since equal area can mean high-precision-low-recall versus the reverse, and which you want depends on downstream cost. Behavior at the operating threshold you'd actually deploy, not averaged over all thresholds. Inference speed and memory against the deployment target. And error clustering — whether failures concentrate in an identifiable regime, which is far more dangerous than the same rate spread uniformly.",
+       cite:"Elgendy ch. 4.1, pp. 167–170."}
+    ]
+  },
+
+  /* ---------- VB6 ---------- */
+  {
+    id:"b6", n:"Session 6", title:"Attention and Transformers",
+    blurb:"Self-attention from scratch, and what happened when it reached images.",
+    screens:[
+      {h:"The problem attention solves", body:[
+        "Convolution is local by construction: each output depends on a fixed small neighborhood. Long-range relationships require stacking many layers to grow the receptive field, and even then the connection is indirect.",
+        "Attention takes the opposite approach. Every position can look at every other position directly, and the network learns which ones matter for each query.",
+        "That's the core idea. The rest is mechanism.",
+        ["src","Prince, ch. 12.1–12.2, pp. 221–227. Starmer ch. 11, printed pp. 207–219, is the gentlest version."]
+      ]},
+      {h:"Query, key, value", body:[
+        "Three vectors are computed from each input position, by three learned linear transformations.",
+        "The <strong>query</strong> represents what this position is looking for. The <strong>key</strong> represents what each position offers. The <strong>value</strong> is the content a position contributes if attended to.",
+        "For a given position, take its query and compare it against every position's key by dot product. Large dot product means a good match. Convert those scores to weights summing to one via softmax. Then output the weighted sum of all values.",
+        "So each output position is a blend of all input positions, mixed according to learned relevance. The library metaphor is standard and it works: the query is your request, keys are the spine labels, values are the contents, and you get a blend of the books weighted by how well each spine matched."
+      ]},
+      {h:"Why multiple heads", body:[
+        "One attention operation produces one weighting pattern per position. But a position may need to relate to others in several distinct ways at once.",
+        "<strong>Multi-head attention</strong> runs several attention operations in parallel with separate learned projections, then concatenates the results. Each head can specialize in a different relationship.",
+        "It's the same reason a convolutional layer has many kernels rather than one.",
+        ["src","Prince, ch. 12.3–12.4, pp. 227–230."]
+      ]},
+      {h:"Position has to be added back", body:[
+        "A structural consequence people miss. Attention as described has no notion of order or location: permute the inputs and the outputs permute identically, with no other change.",
+        "For images that's a serious problem, since spatial arrangement is most of the information.",
+        "So position is injected explicitly, by adding a positional encoding to each input. Sinusoidal patterns at various frequencies in the original formulation, learned position embeddings in most vision work.",
+        "This is a real difference from convolution, which encodes locality structurally and can't lose track of it. Attention has to be told where things are.",
+        ["aside","Why it matters for your work","Junction classification depends on angular geometry — the arrangement of branches. A model whose spatial understanding comes from a learned positional encoding rather than structural locality may handle that differently than a CNN, for better or worse. It's a real design question rather than a settled one."]
+      ]},
+      {h:"Vision transformers", body:[
+        "Applying this to images required solving one problem: attention costs grow with the square of the number of positions, and treating every pixel as a position is computationally impossible for any real image.",
+        "The solution is patches. Cut the image into fixed-size patches, typically 16×16, flatten each into a vector, and treat the sequence of patches as the input. A 224×224 image becomes 196 patches, which is tractable.",
+        "The finding that made this significant: with enough training data, vision transformers match or beat convolutional networks, despite having none of the built-in assumptions about locality and translation equivariance that were supposed to be why CNNs worked on images.",
+        ["src","Prince, ch. 12.10, <b>Transformers for images</b>, pp. 242–246."]
+      ]},
+      {h:"The catch about data", body:[
+        "That result comes with a condition worth stating precisely, because it's the practically important part.",
+        "CNNs have useful assumptions built in. Vision transformers don't, so they must learn from data what a CNN gets for free. With very large datasets that's an advantage, since learned structure can beat imposed structure. With modest datasets it's a disadvantage, and CNNs often still win.",
+        "For a domain with limited labeled data — which describes most scientific imaging including yours — that argues for convolutional backbones or for transformers initialized from large-scale pretraining, rather than transformers trained from scratch.",
+        "The honest current position is that hybrid architectures and pretrained transformers dominate at scale, while pure CNNs remain entirely reasonable for smaller specialized datasets. Anyone claiming CNNs are obsolete is overstating it."
+      ]},
+      {h:"Reading note", body:[
+        "Prince chapter 12, pp. 221–253, is the clearest written account. Starmer chapters 11 through 14, printed pp. 207–281, build the same material illustrated and step by step, which is worth it if the query-key-value mechanics don't click on first reading.",
+        "Note neither Elgendy nor the Grokking first edition covers this at all. It's the gap those books leave."
+      ]}
+    ],
+    questions:[
+      {q:"Explain self-attention without equations.",
+       prompt:"Ninety seconds.",
+       a:"Each position in the input produces three things: a query describing what it's looking for, a key advertising what it offers, and a value holding its content. To compute the output at one position, compare its query against every position's key to get a relevance score, convert those scores into weights that sum to one, and output the weighted blend of all the values. So every position directly gathers information from every other, with the network learning which relationships matter. Unlike convolution, nothing restricts it to a neighborhood.",
+       cite:"Prince ch. 12.2, pp. 222–227."},
+      {q:"Why do transformers need positional encoding when CNNs don't?",
+       prompt:"",
+       a:"Attention is permutation equivariant — shuffle the inputs and the outputs shuffle identically with no other change — so the mechanism has no inherent notion of where anything is. For images, where spatial arrangement carries most of the information, that's disqualifying, so position is added explicitly as an encoding on each input, either sinusoidal or learned. Convolution encodes locality structurally through the sliding kernel, so it can't lose track of position. The transformer has to be told, which means its spatial understanding is learned rather than guaranteed.",
+       cite:"Prince ch. 12.1 and 12.9, pp. 221–246."},
+      {q:"Why do vision transformers use patches instead of pixels?",
+       prompt:"",
+       a:"Attention compares every position against every other, so cost grows with the square of the sequence length. A 224×224 image has about 50,000 pixels, and the resulting attention matrix is computationally impossible. Splitting into 16×16 patches yields 196 positions, which is tractable. The cost is that fine structure within a patch is compressed into a single embedding at the input, so very small features can be poorly represented — directly relevant when your targets span a handful of pixels.",
+       cite:"Prince ch. 12.10, pp. 242–246."},
+      {q:"When would you still choose a CNN over a vision transformer?",
+       prompt:"",
+       a:"When labeled data is limited, which describes most scientific imaging. CNNs have locality and translation equivariance built in; transformers must learn those from data, which is an advantage at very large scale and a liability at modest scale. Also when features are small relative to a sensible patch size, since patch embedding compresses sub-patch detail. And when compute or latency is constrained. The defensible position is that pretrained transformers and hybrids dominate at scale while CNNs remain reasonable for specialized smaller datasets — claiming CNNs are obsolete overstates the evidence.",
+       cite:"Prince ch. 12.10, pp. 242–246."}
+    ]
+  },
+
+  /* ---------- VB7 ---------- */
+  {
+    id:"b7", n:"Session 7", title:"Generative Models",
+    blurb:"GANs, VAEs, and diffusion — what they do and where they're useful to you.",
+    screens:[
+      {h:"What generative means here", body:[
+        "A discriminative model maps an input to a label. A <strong>generative</strong> model learns the distribution of the data itself, well enough to produce new samples from it.",
+        "Evaluating them is genuinely harder than evaluating classifiers. There's no correct answer to compare against. A generated image is good if it looks plausible and if the set of generated images covers the variety of the real data, and both properties resist clean measurement.",
+        ["src","Prince, ch. 14, <b>Unsupervised learning</b>, pp. 282–288, particularly 14.2 on what makes a good generative model."]
+      ]},
+      {h:"GANs", body:[
+        "Two networks in opposition. A <strong>generator</strong> produces images from random noise. A <strong>discriminator</strong> tries to tell real images from generated ones. Each trains against the other.",
+        "The elegance is that the discriminator supplies the training signal. Nobody has to specify what realistic means; the discriminator learns it and the generator learns to defeat it.",
+        "The well-known difficulty is instability. Training two networks in competition can oscillate or collapse, most notoriously <strong>mode collapse</strong>, where the generator finds a few outputs that reliably fool the discriminator and produces only those, losing the diversity of the real distribution.",
+        ["src","Prince, ch. 15, <b>Generative Adversarial Networks</b>, pp. 289–316; stability at pp. 294–300."]
+      ]},
+      {h:"Variational autoencoders", body:[
+        "A different approach. An <strong>encoder</strong> compresses an image into a low-dimensional latent representation; a <strong>decoder</strong> reconstructs it. The variational part constrains the latent space to a known distribution, so you can sample from it and decode to get new images.",
+        "Compared to GANs: training is far more stable, and the latent space is structured in a way that supports interpolation and manipulation. The cost is that outputs are typically blurrier, because the reconstruction objective rewards hedging between plausible options rather than committing to one.",
+        ["src","Prince, ch. 17, <b>Variational autoencoders</b>, pp. 340–361."]
+      ]},
+      {h:"Diffusion models", body:[
+        "The approach behind current image generation systems, and the idea is unusual enough to be worth stating carefully.",
+        "Training has two directions. The <strong>forward process</strong> takes a real image and adds a small amount of noise, repeatedly, until nothing remains but noise. That direction requires no learning; it's just adding noise on a schedule.",
+        "The <strong>reverse process</strong> is what gets learned: a network trained to remove a small amount of noise, given a noisy image and the noise level.",
+        "To generate, start from pure noise and apply the learned denoising step repeatedly. Each step removes a little noise, and after many steps an image emerges.",
+        "Why it beats GANs: the objective is a stable supervised regression, since you know exactly what noise you added, so there's no adversarial instability and no mode collapse. The cost is that generation requires many sequential network evaluations rather than one.",
+        ["src","Prince, ch. 18, <b>Diffusion models</b>, pp. 362–386. Forward process pp. 363–369, reverse pp. 369–370."]
+      ]},
+      {h:"Where this is useful to you", body:[
+        "It's fair to ask why a detection researcher should care, and there are real answers beyond currency.",
+        "<strong>Augmentation.</strong> Generative models can synthesize additional training examples, though with an important caveat: a model trained on your data and then used to augment it adds no new information about the world, and can amplify existing biases. Its value is mostly in balancing rare classes.",
+        "<strong>Anomaly detection.</strong> A generative model of normal appearance flags what it reconstructs badly. Useful for finding unusual terrain without labels.",
+        "<strong>Learned priors.</strong> Diffusion models have become strong priors for inverse problems — denoising, super-resolution, inpainting — which is directly applicable to degraded or partially occluded imagery.",
+        "<strong>Understanding the field.</strong> Diffusion is where a large share of current vision research sits. Not following it means gradually losing the ability to read the literature."
+      ]},
+      {h:"Reading note", body:[
+        "Prince chapters 14, 15, 17, and 18. Chapter 16 on normalizing flows is skippable unless you want completeness.",
+        "Elgendy chapter 8 covers GANs, pp. 362–394, from the applied side and predates diffusion entirely."
+      ]}
+    ],
+    questions:[
+      {q:"Why is evaluating a generative model harder than evaluating a classifier?",
+       prompt:"",
+       a:"There's no ground-truth output to compare against — a generated image isn't right or wrong, it's plausible or not. Quality has at least two dimensions that trade off: sample fidelity, whether individual outputs look real, and coverage, whether the generated distribution spans the variety of the real one. A model producing a few flawless images has excellent fidelity and terrible coverage, which mode collapse exemplifies. Proxy metrics like FID exist but summarize both properties into one number and are known to be manipulable.",
+       cite:"Prince ch. 14.2–14.3, pp. 283–287."},
+      {q:"What is mode collapse and why does the GAN objective invite it?",
+       prompt:"",
+       a:"Mode collapse is the generator producing only a narrow subset of outputs — a few images that reliably fool the discriminator — losing the diversity of the real distribution. The objective invites it because the generator is rewarded solely for fooling the discriminator, not for covering the data distribution. If a handful of outputs work, producing only those is an optimal strategy under that objective. The adversarial dynamic makes it worse: the two networks can chase each other in cycles rather than converging.",
+       cite:"Prince ch. 15.2, pp. 294–300."},
+      {q:"Explain how a diffusion model generates an image.",
+       prompt:"",
+       a:"Training uses a forward process that repeatedly adds small amounts of noise to real images until only noise remains — this requires no learning, since the noise schedule is chosen. The network is trained on the reverse: given a noisy image and its noise level, predict the noise to remove. Because you know exactly what you added, this is stable supervised regression rather than an adversarial game. Generation starts from pure noise and applies the learned denoising step many times, with an image gradually emerging. The tradeoff is many sequential network evaluations per sample.",
+       cite:"Prince ch. 18.1–18.3, pp. 362–370."},
+      {q:"Why does diffusion avoid the problems that made GANs hard to train?",
+       prompt:"",
+       a:"The training objective is a standard supervised regression with a known target — the noise that was actually added — so there's no second network to compete with and no adversarial dynamic to destabilize. That removes both oscillation and mode collapse, since the model is trained to reverse the noising of every training image rather than to satisfy a moving critic. The cost is inference: sampling requires many sequential denoising steps, making generation far slower than a GAN's single forward pass, which is why much recent work targets step reduction.",
+       cite:"Prince ch. 18, pp. 362–386."},
+      {q:"Would you use a generative model to augment a small labeled dataset? Argue carefully.",
+       prompt:"",
+       a:"Cautiously and for a specific purpose. A generator trained on your data adds no new information about the world — it can only recombine what's already there, and it will faithfully reproduce existing biases, potentially amplifying them by making a skewed distribution look richer than it is. Its legitimate uses are balancing rare classes so they aren't swamped in training, and stress-testing a model against controlled variation. What it cannot do is substitute for collecting genuinely new data, and reporting performance gains from synthetic augmentation without validating on real held-out data is a way to fool yourself.",
+       cite:"Prince ch. 14, pp. 282–288."}
     ]
   }
   ]
