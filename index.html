@@ -87,6 +87,14 @@ pre code{background:none;padding:0;color:var(--ink)}
 .aside b{font-family:var(--display);display:block;font-size:11px;letter-spacing:.14em;
   text-transform:uppercase;color:var(--rose);margin-bottom:7px;font-weight:500}
 
+/* ---------- source citations ---------- */
+.src{font-family:var(--display);font-size:12.5px;color:var(--ink-dim);
+  border-left:2px solid var(--gold);padding:8px 0 8px 12px;margin:20px 0;line-height:1.5}
+.src b{color:var(--gold);font-weight:500}
+.qcite{font-family:var(--display);font-size:12px;color:var(--ink-dim);margin-top:18px;
+  padding-top:14px;border-top:1px solid var(--line)}
+.qcite b{color:var(--gold);font-weight:500}
+
 /* ---------- desk work ---------- */
 .desk{border:1px dashed var(--line);border-radius:12px;padding:18px;margin:24px 0;
   background:var(--surface)}
@@ -586,6 +594,745 @@ const COURSES = [
     ]
   }
   ]
+},
+
+/* ============================================================
+   COURSE 2 — Grokking Machine Learning (Serrano)
+   Gated behind completion of every Fluent Python session.
+   ============================================================ */
+{
+  id:"grokking-ml",
+  title:"Grokking Machine Learning",
+  sub:"Block 1 — Foundations and Evaluation",
+  requires:"fluent-python",
+  note:"You know this material. This course is about explaining it in plain language under pressure, which is a different skill.",
+  sessions:[
+
+  /* ---------- ML S1 ---------- */
+  {
+    id:"m1", n:"Session 1", title:"What Machine Learning Actually Is",
+    blurb:"Remember, formulate, predict. Supervised, unsupervised, reinforcement.",
+    screens:[
+      {h:"The plainest possible definition", body:[
+        "Ordinary software is a set of instructions somebody wrote. If you want it to handle a new case, a person edits the instructions.",
+        "Machine learning flips which part is written by hand. Instead of writing the rules, you write a procedure that <strong>looks at examples and produces the rules itself</strong>.",
+        "Serrano's framing is common sense done by a computer. You've seen a thousand houses and their prices, so you have a rough sense of what a new house should cost. Nobody gave you a formula. You built one from examples without noticing.",
+        "That's the whole idea. Everything else is machinery for doing it reliably."
+      ]},
+      {h:"Remember, formulate, predict", body:[
+        "The book's three-step frame, which is worth having because it maps cleanly onto how you'd describe any project.",
+        "<strong>Remember.</strong> Collect the past cases. Houses that sold, images that were labeled, emails marked as spam.",
+        "<strong>Formulate.</strong> Find a rule that fits those cases. This is the training step, and it's where all the algorithms live.",
+        "<strong>Predict.</strong> Apply the rule to something new you haven't seen.",
+        "The interesting failures all happen at the seam between formulate and predict. A rule can fit the remembered cases perfectly and be useless on new ones. That's session 3's entire subject."
+      ]},
+      {h:"Labeled and unlabeled", body:[
+        "The single most useful distinction in the field, and it's simpler than it sounds.",
+        "<strong>Labeled data</strong> means each example comes with the answer attached. A house with its sale price. An image with a note saying what's in it. A junction with its type marked as T, Y, or X.",
+        "<strong>Unlabeled data</strong> is the examples without answers. Just the houses. Just the images.",
+        "Labels are usually the expensive part. Collecting a million images is cheap. Having a person look at a million images and mark what's in each one is not. Much of practical ML is arranging to need fewer labels."
+      ]},
+      {h:"The three branches", body:[
+        "<strong>Supervised learning</strong> works with labeled data. You show the algorithm examples with answers, and it learns to produce the answer for new cases. This covers most of what people mean when they say ML.",
+        "It splits in two by what kind of answer you want. <strong>Regression</strong> predicts a number, like a price or a temperature. <strong>Classification</strong> predicts a category, like spam or not spam, or which of three junction types this is.",
+        "<strong>Unsupervised learning</strong> works with unlabeled data. There are no answers, so instead the algorithm finds structure — which examples resemble each other, what the data's natural groupings are.",
+        "<strong>Reinforcement learning</strong> is neither. There's no dataset of examples. An agent acts in an environment and gets rewards or penalties, and learns which actions pay off. Games and robotics live here."
+      ]},
+      {h:"Why the distinction earns its keep", body:[
+        "It isn't taxonomy for its own sake. The branch determines what a good result even means.",
+        "In supervised learning you can hold back some labeled examples, predict them, and compare against the truth. There's a right answer to check against.",
+        "In unsupervised learning there's no truth to check against. If the algorithm splits your data into four groups, no label tells you whether those are the right four. Evaluation becomes a judgment call, which is why unsupervised results are much easier to fool yourself with.",
+        ["aside","The interview version","When someone asks what kind of problem you're solving, they're really asking what your evaluation looks like. \"Supervised classification\" tells them you have held-out labeled data and can quote accuracy. \"Unsupervised\" tells them you'll have to argue for your result rather than measure it."]
+      ]},
+      {h:"Reading note", body:[
+        "Book: chapters 1 and 2, PDF pages 23 to 55.",
+        "Read fast. This material is below your level and the value is in the vocabulary and the framing, not the content. Pay attention to how Serrano explains things without equations, because that register is what the questions are testing."
+      ]}
+    ],
+    questions:[
+      {q:"Explain machine learning to someone non-technical in under a minute.",
+       prompt:"This is a real interview opener, especially at mission-driven companies where you'll talk to non-engineers.",
+       a:"Normally a person writes the rules a computer follows. With machine learning, you instead show the computer a lot of examples where you already know the answer, and it works out the rules itself. Once it has, you can hand it a new case it's never seen and it applies what it worked out. It's how you'd guess a house's price from having seen many houses sell — nobody gave you a formula, you built one from experience. The value is for problems where the rules are real but nobody can write them down explicitly, like recognizing what's in an image."},
+      {q:"What's the difference between supervised and unsupervised learning, and why does it change how you work?",
+       prompt:"",
+       a:"Supervised learning uses labeled examples where each case comes with its correct answer; unsupervised uses unlabeled data and finds structure instead. The practical difference is evaluation. With labels you can hold data back, predict it, and measure against the truth, so a claim of quality is checkable. Without labels there's no ground truth, so you're arguing that a grouping is meaningful rather than demonstrating it. That makes unsupervised results much easier to fool yourself with, and it changes what you can promise a stakeholder."},
+      {q:"When is regression the right framing and when is classification?",
+       prompt:"",
+       a:"Regression when the answer is a continuous quantity where being close counts — price, temperature, a distance. Classification when the answer is one of a discrete set and being close doesn't mean anything. The subtle part is that the choice isn't always dictated by the data: you can bin a continuous target into categories or treat ordered categories as numbers. The right framing follows from what the downstream decision needs and from what error you actually care about, not from the column type."},
+      {q:"Where does most of the cost sit in a supervised project?",
+       prompt:"",
+       a:"Almost always the labels. Raw data is often abundant and cheap; expert annotation is neither, especially when labeling requires domain knowledge rather than common sense. That cost shapes real design decisions — whether to build labeling tooling, whether to use transfer learning or pretraining to reduce label demand, whether a semi-supervised or active-learning setup is worth the complexity. It's also why label quality deserves as much scrutiny as model choice, since a model can't be better than the labels it learned from."}
+    ]
+  },
+
+  /* ---------- ML S2 ---------- */
+  {
+    id:"m2", n:"Session 2", title:"Fitting a Line, and Gradient Descent",
+    blurb:"Linear regression, error functions, and how the computer actually finds the answer.",
+    screens:[
+      {h:"The simplest possible model", body:[
+        "Take houses. Each has a size, and each sold for a price. Plot size against price and you get a scatter of points that trends upward.",
+        "The simplest model is a straight line through that scatter. Given a new house's size, you read the line and get a predicted price.",
+        "That's <strong>linear regression</strong>. All the machinery underneath exists to answer one question: which line?"
+      ]},
+      {h:"Which line is best?", body:[
+        "You need a way to score a candidate line, and the score has to be a single number so you can compare two lines and say which is better.",
+        "That scoring rule is the <strong>error function</strong>, also called the loss function. It measures how badly the line misses the points.",
+        "The usual choice: for each point, take the vertical distance from the point to the line, square it, and add them all up. Squaring does two jobs. It makes misses in either direction count as bad rather than cancelling out, and it makes big misses count disproportionately more than small ones.",
+        ["aside","This is a choice, not a law","Squaring means one wild outlier can dominate the total and drag the whole line toward it. Using absolute distance instead makes the fit far less sensitive to outliers. Neither is correct in the abstract — the right error function is the one whose penalties match what actually costs you something in the real problem."]
+      ]},
+      {h:"Finding the best line", body:[
+        "Now the question is how the computer searches for the line with the lowest error.",
+        "Picture the error as a landscape. Every possible line is a location, and the height at that location is how much error that line produces. You want the lowest point in the landscape.",
+        "You can't see the whole landscape — it's too big to check every line. But you can feel the slope where you're standing.",
+        "So: start anywhere. Feel which direction goes downhill. Take a small step that way. Repeat. That's <strong>gradient descent</strong>, and it's the engine under almost everything in modern ML including every network you've trained."
+      ]},
+      {h:"The step size", body:[
+        "How big a step you take each time is the <strong>learning rate</strong>, and it's the parameter people most often get wrong.",
+        "Too small and you creep downhill, taking forever, possibly stopping before you arrive.",
+        "Too large and you leap past the bottom and land partway up the far side, then leap back over. The error bounces around or grows instead of falling.",
+        "There's no universally correct value. It depends on the landscape's shape, which depends on your data and your model."
+      ]},
+      {h:"Parameters and hyperparameters", body:[
+        "A distinction worth being crisp about because interviewers ask.",
+        "<strong>Parameters</strong> are what training learns. For a line, the slope and the intercept. For a network, the weights. You don't choose these; the algorithm finds them.",
+        "<strong>Hyperparameters</strong> are what you choose before training starts. The learning rate. How many steps. How complex a model to use.",
+        "The clean way to say it: parameters are found by the data, hyperparameters are set by you. Which means hyperparameters need their own selection procedure, and doing that badly is one of the most common ways to leak information into your results."
+      ]},
+      {h:"When a line isn't enough", body:[
+        "If the data curves, a straight line can't follow it no matter how well you optimize.",
+        "<strong>Polynomial regression</strong> lets the model bend by allowing squared, cubed, and higher terms. A degree-1 polynomial is a line. Degree 2 curves once. Higher degrees wiggle more.",
+        "This immediately raises the question the next session is entirely about: if more bend fits the training points better, why not always use a lot of bend?"
+      ]},
+      {h:"Reading note", body:[
+        "Book: chapter 3, PDF pages 57 to 97. Appendix B, pages 471 to 491, is the math behind gradient descent and is worth reading if you want the derivative-level account.",
+        "Skip the Turi Create sections. That library is not what industry uses and the API details won't transfer."
+      ]}
+    ],
+    questions:[
+      {q:"Explain gradient descent to someone who doesn't know calculus.",
+       prompt:"Under a minute. This gets asked constantly.",
+       a:"Imagine standing on a foggy hillside trying to reach the bottom. You can't see the valley, but you can feel which way the ground slopes under your feet. So you take a small step downhill, then feel again, then step again, and repeat until the ground is flat. Gradient descent does that with error: the height is how wrong the model currently is, the position is the model's settings, and each step nudges the settings in the direction that reduces error fastest. The step size matters — too small and you never arrive, too large and you overshoot the valley entirely."},
+      {q:"Why square the errors instead of just adding up the distances?",
+       prompt:"",
+       a:"Two reasons. Squaring removes the sign, so misses above and below the line both count as bad rather than cancelling. And it penalizes large misses disproportionately, so the fit works harder to avoid being badly wrong anywhere than to be slightly better everywhere. The tradeoff is outlier sensitivity: one extreme point can dominate the total and pull the fit toward it. Absolute error is more robust to that. Squared error also has a smooth derivative everywhere, which historically made it convenient for optimization. The real criterion is whether the penalty shape matches the cost of being wrong in your actual problem."},
+      {q:"What's the difference between a parameter and a hyperparameter?",
+       prompt:"",
+       a:"Parameters are learned from the data during training — the slope and intercept of a line, the weights of a network. Hyperparameters are set before training and govern how learning happens or how complex the model is — learning rate, number of iterations, polynomial degree, regularization strength. The consequence is that hyperparameters need their own selection procedure, and it has to use data separate from both training and final testing. Tuning hyperparameters against the test set is one of the most common ways people inflate reported performance without realizing it."},
+      {q:"Your training loss is bouncing around instead of decreasing. What do you check?",
+       prompt:"",
+       a:"Learning rate first — too large a step overshoots the minimum and can oscillate or diverge, and it's the most common cause. Then whether the input features are on wildly different scales, which distorts the error landscape into a narrow valley where a single step size can't work well in all directions; normalizing fixes that. Then batch size, since very small batches make each estimate of the gradient noisy. And then whether the loss itself is correctly implemented — a metric computed over the wrong axis can produce nonsense that looks like an optimization problem."},
+      {q:"A colleague says polynomial regression is better than linear because it fits the training data more closely. Respond.",
+       prompt:"",
+       a:"Fitting the training data more closely isn't the goal — predicting new data well is, and past a point those diverge. A high-degree polynomial has enough flexibility to pass near every training point including the noise, and the wiggles it invents to do that are fitted to accidents of the sample rather than to real structure. On new data it typically performs worse than the simpler model. The way to settle it is to hold data out and compare there, not to compare training fit, which will always favor the more flexible model."}
+    ]
+  },
+
+  /* ---------- ML S3 ---------- */
+  {
+    id:"m3", n:"Session 3", title:"Overfitting, Validation, and Regularization",
+    blurb:"The most important session in the course, and the most interviewed topic in ML.",
+    screens:[
+      {h:"Two ways to be wrong", body:[
+        "<strong>Underfitting</strong> is when the model is too simple to capture what's actually in the data. A straight line through data that clearly curves. It's wrong on the training data and wrong on new data, in the same way.",
+        "<strong>Overfitting</strong> is the opposite and it's more dangerous. The model is flexible enough to follow the training data very closely, including its noise. It looks excellent on training data and performs badly on anything new.",
+        "The danger is asymmetric. Underfitting announces itself — your training error is bad and you can see it. <strong>Overfitting looks like success</strong> right up until deployment."
+      ]},
+      {h:"Why noise is the enemy", body:[
+        "Any real dataset contains two things: the real underlying pattern, and noise — measurement error, sampling accident, irrelevant variation.",
+        "A model with limited flexibility can only capture broad structure, so it tends to pick up the pattern and ignore the noise.",
+        "A model with enough flexibility will fit whatever you give it, and it has no way to tell the pattern from the noise. The noise in <em>your particular sample</em> won't repeat in a new sample, so everything the model learned from it is worse than useless.",
+        "That's the whole mechanism. Overfitting is learning things that were true of your sample rather than true of the world."
+      ]},
+      {h:"The fix: hold data back", body:[
+        "You can't detect overfitting by looking at training performance, because overfitting is precisely the case where training performance looks good.",
+        "So you hold some data back. Train on one portion, then evaluate on data the model never saw. If it does well on training and poorly on held-out data, that gap <em>is</em> overfitting, measured.",
+        "This is the <strong>train/test split</strong>, and it's the foundational discipline of the entire field."
+      ]},
+      {h:"The golden rule", body:[
+        ["aside","Say this one out loud","Never use your test data to make any decision about your model. Not to choose a model, not to tune a hyperparameter, not to decide when to stop training."],
+        "The reason: the moment a decision is influenced by test data, the test set has taught the model something, and it's no longer an honest estimate of performance on unseen data. It's now part of training, in effect, and your reported number is optimistic by an unknown amount.",
+        "The failure is silent. Nothing errors. You just report a number that doesn't hold up."
+      ]},
+      {h:"Which means you need three sets", body:[
+        "But you obviously do need to make decisions, and you need data to make them on. Hence a third split.",
+        "<strong>Training set</strong> — the model learns its parameters here.",
+        "<strong>Validation set</strong> — you compare models and tune hyperparameters here.",
+        "<strong>Test set</strong> — touched once, at the very end, to report a final honest number.",
+        "The validation set absorbs the contamination that would otherwise ruin the test set. Over many rounds of tuning you'll gradually overfit to the validation set too, which is expected and is why the test set stays sealed."
+      ]},
+      {h:"Regularization", body:[
+        "Splitting data lets you <em>detect</em> overfitting. Regularization helps <em>prevent</em> it.",
+        "The idea: add a penalty to your error function for model complexity. Now the model is scored on both how well it fits and how complicated it is, so extra complexity has to earn its place by improving the fit enough to outweigh its own penalty.",
+        "In practice this means penalizing large parameter values, since wild wiggles require large coefficients. Two common forms: <strong>L2</strong> penalizes the sum of squared parameters and shrinks everything smoothly, while <strong>L1</strong> penalizes the sum of absolute values and drives some parameters to exactly zero, which effectively deletes features.",
+        "How strongly to penalize is itself a hyperparameter, chosen on the validation set."
+      ]},
+      {h:"Where the splitting goes wrong", body:[
+        "The standard advice is to split randomly. For your work, random splitting is often exactly wrong, and this is worth being ready to explain.",
+        "If your data has spatial structure, two tiles from the same HiRISE image are not independent samples. Split them randomly and near-identical tiles land in both training and test, so the model can succeed by recognizing the scene rather than the feature. Your test score is inflated and it is not detectable from the numbers alone.",
+        "The same problem appears with time series, where random splitting lets the model see the future, and with grouped data, where multiple records come from the same subject or site.",
+        ["aside","Why this is your strongest card","This is a place where domain knowledge beats ML technique outright. Someone who only knows algorithms will split randomly and get a great, meaningless number. Being the person who catches that is exactly the applied-scientist value you were describing to Ben."]
+      ]},
+      {h:"Reading note", body:[
+        "Book: chapter 4, PDF pages 99 to 124.",
+        "Read this one carefully even though you know it. The plain-language version of these ideas is what you'll need in an interview, and the spatial-splitting point above is not in the book — that's yours to add."
+      ]}
+    ],
+    questions:[
+      {q:"Explain overfitting without using the word overfitting.",
+       prompt:"",
+       a:"A model that's flexible enough will fit whatever you show it, including the accidental noise in that particular sample. It ends up learning things that were true of your data rather than true of the world. On the examples it trained on it looks excellent, because it essentially memorized them. On new examples the accidents don't repeat, so everything it learned from them is worthless or harmful, and performance drops. The tell is a large gap between performance on training data and performance on data it hasn't seen."},
+      {q:"Why do you need a validation set when you already have a test set?",
+       prompt:"",
+       a:"Because every decision you make using a dataset contaminates it as an estimate of unseen performance. If you pick a model or tune a learning rate by comparing scores on the test set, you've let the test set influence the model, and its number is now optimistically biased by an unknown amount. The validation set exists to absorb that contamination — you tune against it freely, accepting that you'll gradually overfit to it, while the test set stays untouched until the end so the final number means something."},
+      {q:"You're building a detector on tiles cut from orbital images. Why might a random train/test split give you a misleadingly good result?",
+       prompt:"This is the question where your domain background beats a generic ML answer.",
+       a:"Tiles cut from the same source image aren't independent. Adjacent or overlapping tiles share terrain, illumination, atmospheric conditions, and instrument characteristics. A random split puts near-duplicates in both training and test, so the model can score well by recognizing the scene rather than by learning the feature of interest. The number looks strong and doesn't survive a new image. The fix is splitting at the level of the independent unit — by source image or by geographic region — so test data comes from scenes the model has never encountered."},
+      {q:"What does regularization actually do, and how does L1 differ from L2?",
+       prompt:"",
+       a:"It adds a penalty for model complexity to the objective, so complexity has to pay for itself by improving the fit more than the penalty costs. In practice that means penalizing large parameter values, since sharp wiggles require large coefficients. L2 penalizes the sum of squared parameters and shrinks them all smoothly toward zero without eliminating any. L1 penalizes the sum of absolute values and drives some coefficients to exactly zero, which performs feature selection as a side effect. L1 is preferable when you believe most features are irrelevant and want a sparse model; L2 when you expect many small contributions."},
+      {q:"Your model gets 97% on the test set. What would make you distrust that number before celebrating?",
+       prompt:"Interviewers love this one because it separates people who've been burned from people who haven't.",
+       a:"First, whether the split is genuinely independent — spatial, temporal, or group leakage produces high scores that don't survive deployment. Second, whether the test set was ever used for a decision, including model selection or early stopping. Third, class balance: 97% is unimpressive if 97% of examples belong to one class, so I'd want per-class recall rather than accuracy. Fourth, whether any preprocessing statistic — normalization, imputation, feature selection — was computed over the full dataset rather than the training portion only, which leaks quietly. Fifth, whether the test set actually resembles deployment conditions."},
+      {q:"How would you explain to a non-technical stakeholder why you can't just train on all the data?",
+       prompt:"",
+       a:"If I train on everything, I have no honest way to tell you how well it works. The only evidence I could show you is how well it did on the examples it already studied, and any sufficiently flexible model can score near-perfectly on those by memorizing them. Holding data back is like keeping some exam questions sealed: the model never sees them during study, so its score on them is a fair estimate of how it will do on the real cases you care about. Giving up that data costs a little accuracy and buys the ability to make a trustworthy claim."}
+    ]
+  },
+
+  /* ---------- ML S4 ---------- */
+  {
+    id:"m4", n:"Session 4", title:"Drawing the Boundary",
+    blurb:"Perceptrons, logistic classifiers, and what a probability output actually means.",
+    screens:[
+      {h:"From predicting numbers to predicting categories", body:[
+        "Regression drew a line <em>through</em> points to predict a number. Classification draws a line <em>between</em> points to separate categories.",
+        "Same geometry, different job. Instead of asking what value goes with this input, you're asking which side of the boundary it falls on.",
+        "With two features you're drawing a line on a plane. With three, a plane in space. With hundreds, a hyperplane you can't picture — but the algebra is identical and nothing about the method changes."
+      ]},
+      {h:"The perceptron", body:[
+        "The simplest classifier. It computes a weighted sum of the inputs and outputs one category if the sum is above a threshold, the other if below.",
+        "Training is intuitive: show it examples, and each time it gets one wrong, nudge the weights so the boundary moves toward classifying that example correctly. Repeat until the mistakes stop, or until you give up.",
+        "The limitation that matters: a perceptron can only produce a straight boundary. If the two classes aren't separable by a straight line, no amount of training fixes it. The algorithm just cycles without converging."
+      ]},
+      {h:"The problem with hard answers", body:[
+        "The perceptron outputs a bare category. Class A. No indication of how sure it is.",
+        "That's a real loss. A point sitting far from the boundary and a point sitting right on it get reported identically, even though one is a confident call and the other is nearly a coin flip.",
+        "It also makes training awkward. If the output is a hard yes or no, small weight changes often produce no change in the output at all, so there's no gradient to follow, so gradient descent has nothing to work with."
+      ]},
+      {h:"Logistic classifiers", body:[
+        "The fix is to make the output continuous. Instead of a hard threshold, pass the weighted sum through a function that squashes any number into the range 0 to 1.",
+        "That function is the <strong>sigmoid</strong>. Large positive inputs come out near 1, large negatives near 0, and inputs near the boundary come out near 0.5.",
+        "Now the output carries confidence. And because the function is smooth, small weight changes produce small output changes, which gives gradient descent a slope to follow. That's the deeper reason for the sigmoid, beyond interpretability."
+      ]},
+      {h:"What that number is and isn't", body:[
+        ["aside","A distinction people get wrong constantly","A sigmoid output of 0.9 is not a 90% probability that the answer is class A. It's a score between 0 and 1 that behaves somewhat like a confidence. Whether it corresponds to a real frequency is a separate property called calibration, and models are frequently badly calibrated — modern neural networks are notoriously overconfident."],
+        "If a decision depends on the number meaning what it appears to mean, you have to check calibration explicitly by binning predictions and comparing predicted rates against observed rates. Treating raw scores as probabilities is a quiet, common error."
+      ]},
+      {h:"More than two classes", body:[
+        "For several categories at once, the usual approach computes a separate score for each class and then converts the whole set into values summing to 1 using the <strong>softmax</strong> function.",
+        "Softmax is the multi-class generalization of the sigmoid. The same calibration caveat applies, and more strongly: the fact that outputs sum to 1 makes them look even more like probabilities than they are.",
+        "Your T/Y/X junction classification is exactly this shape — three classes, one softmax output per detection."
+      ]},
+      {h:"Reading note", body:[
+        "Book: chapters 5 and 6, PDF pages 125 to 198.",
+        "Skim the perceptron implementation. Read the sigmoid and softmax sections properly, since the plain-language explanation of why a smooth output matters is the part worth having ready."
+      ]}
+    ],
+    questions:[
+      {q:"Why replace the perceptron's hard threshold with a sigmoid?",
+       prompt:"",
+       a:"Two reasons, and the second matters more. The output becomes graded rather than binary, so a point far from the boundary is distinguishable from one sitting on it. More fundamentally, a hard threshold is flat almost everywhere — small weight changes produce no output change, so there's no gradient for optimization to follow. The sigmoid is smooth, so every weight change produces a proportional output change and gradient descent has a slope to descend. Trainability is the deeper motivation; interpretability is the visible benefit."},
+      {q:"Your classifier outputs 0.9 for an example. What does that actually mean?",
+       prompt:"An interviewer asking this is checking whether you conflate scores with probabilities.",
+       a:"It means the model's score, after squashing, is 0.9 — high confidence relative to its own scale. It does not automatically mean there's a 90% chance the label is correct. That interpretation requires calibration, the property that among all examples scored 0.9, roughly 90% actually are that class. Many models, neural networks especially, are poorly calibrated and systematically overconfident. If a downstream decision depends on the number being a real probability, you check by binning predictions and comparing predicted against observed rates, and recalibrate if needed."},
+      {q:"What can't a perceptron do?",
+       prompt:"",
+       a:"It can only produce a linear decision boundary, so any class structure that isn't linearly separable is out of reach regardless of training time — the classic example being XOR. On non-separable data the update rule never converges, it just cycles. It also gives no confidence information, which makes threshold tuning impossible. The historical importance is that these limitations motivated stacking layers with nonlinear activations, which is where neural networks came from."},
+      {q:"How does softmax relate to sigmoid?",
+       prompt:"",
+       a:"Softmax is the multi-class generalization. Sigmoid maps a single score to a value between 0 and 1 for a binary decision. Softmax takes a vector of per-class scores, exponentiates them, and normalizes so the outputs are positive and sum to one. For two classes, softmax reduces to sigmoid. The practical caveat is that summing to one makes the outputs look more probability-like than they are — normalization is not calibration, and a confidently wrong model still produces a tidy set of numbers summing to one."}
+    ]
+  },
+
+  /* ---------- ML S5 ---------- */
+  {
+    id:"m5", n:"Session 5", title:"Measuring a Classifier",
+    blurb:"Why accuracy lies, and precision, recall, and ROC in plain language.",
+    screens:[
+      {h:"Accuracy, and why it fails", body:[
+        "<strong>Accuracy</strong> is the fraction of predictions that were correct. Obvious, intuitive, and often useless.",
+        "Consider a rare condition present in one case out of a thousand. A model that says \"no\" every single time achieves 99.9% accuracy and has never once identified a case. The number is excellent and the model is worthless.",
+        "This is the <strong>class imbalance</strong> problem, and it's not an edge case. Fraud, disease, equipment failure, wildfire ignition, and rare geological features are all rare by nature. Accuracy is misleading for exactly the problems people most want to solve."
+      ]},
+      {h:"Four outcomes, not two", body:[
+        "Fixing it starts with noticing that a binary prediction has four possible outcomes, not two.",
+        "<strong>True positive</strong> — you said yes and it was yes.<br><strong>True negative</strong> — you said no and it was no.<br><strong>False positive</strong> — you said yes and it was no. A false alarm.<br><strong>False negative</strong> — you said no and it was yes. A miss.",
+        "Arranged in a square this is the <strong>confusion matrix</strong>. Accuracy collapses all four into one number and throws away the distinction between the two ways of being wrong.",
+        "That distinction is usually the entire point. A false alarm and a miss almost never cost the same thing."
+      ]},
+      {h:"Precision and recall", body:[
+        "<strong>Precision</strong> answers: of everything I flagged, how much was real? Low precision means crying wolf.",
+        "<strong>Recall</strong> answers: of everything real, how much did I catch? Low recall means missing cases.",
+        "They pull against each other. Flag everything and recall is perfect while precision collapses. Flag only your single most confident case and precision may be perfect while recall is near zero.",
+        ["aside","Making it concrete","Wildfire detection from camera feeds: a false positive sends a crew to a dust plume, costing money and eroding trust. A false negative misses a real ignition. Those costs are wildly different, and which you weight is a decision about consequences, not a technical question with a mathematically correct answer."]
+      ]},
+      {h:"The F1 score, and its catch", body:[
+        "<strong>F1</strong> combines precision and recall into a single number using their harmonic mean, which punishes imbalance — you can't score well by maxing one and abandoning the other.",
+        "It's convenient for comparing models and it hides the thing that matters. F1 weights precision and recall equally, which is a claim that false alarms and misses cost the same. That claim is almost always false in practice.",
+        "If you know the real cost ratio, use a weighted variant or report both numbers separately. Reaching for F1 by default is a way of avoiding the cost question rather than answering it."
+      ]},
+      {h:"The threshold is a dial", body:[
+        "Here's the piece people miss. A classifier producing a score between 0 and 1 doesn't have fixed precision and recall. You choose a cutoff, and the cutoff moves both.",
+        "Lower the threshold and you flag more things: recall rises, precision falls. Raise it and the reverse.",
+        "So there is no single precision or recall for a model. There's a curve of achievable tradeoffs, and picking a point on it is a decision about consequences that belongs to whoever owns the consequences."
+      ]},
+      {h:"ROC and AUC", body:[
+        "The <strong>ROC curve</strong> plots that entire tradeoff. Sweep the threshold from one extreme to the other and plot true positive rate against false positive rate at each setting.",
+        "A model with no skill produces a diagonal line. A better model bows toward the top-left corner, meaning it catches more real cases at any given false-alarm rate.",
+        "<strong>AUC</strong> is the area under that curve, condensing it to one number. It has a clean interpretation: the probability that a randomly chosen positive example scores higher than a randomly chosen negative one. Because it's computed across all thresholds, it measures ranking quality independent of where you set the cutoff.",
+        ["aside","The catch, again","AUC is computed using false positive <em>rate</em>, which divides by the number of negatives. With severe imbalance that denominator is enormous, so a large absolute number of false alarms barely moves the rate. AUC can look strong while the model is unusable in practice. For rare positives, the precision-recall curve is more honest."]
+      ]},
+      {h:"Reading note", body:[
+        "Book: chapter 7, PDF pages 199 to 226.",
+        "This is the highest-value chapter in the book for interviews. Metric questions come up in nearly every applied ML screen, and the ability to explain the precision-recall tradeoff in terms of real consequences rather than formulas is what separates a good answer from a recited one."
+      ]}
+    ],
+    questions:[
+      {q:"Why is accuracy a bad metric, and when is it fine?",
+       prompt:"",
+       a:"It fails under class imbalance. If one class is 99.9% of the data, always predicting that class scores 99.9% while detecting nothing, so the number is high and the model is worthless. It also collapses the two kinds of error together, hiding the distinction between false alarms and misses, which is usually the distinction that matters. Accuracy is fine when classes are roughly balanced and the two error types genuinely carry similar cost — otherwise report per-class recall, precision, or the full confusion matrix."},
+      {q:"Explain precision and recall to a stakeholder using their problem, not statistics.",
+       prompt:"Pick a domain and answer concretely.",
+       a:"For wildfire detection: recall is what fraction of real fires we catch — if it's 80%, one in five real ignitions goes unreported. Precision is what fraction of our alerts are real fires — if it's 50%, half the crews we dispatch find nothing. They trade against each other: we can catch nearly every fire by alerting aggressively, at the cost of many false dispatches, or make almost every alert real by only flagging obvious cases, at the cost of missing subtle early ones. Where we set that dial is your decision, because you own both costs."},
+      {q:"What's wrong with reporting F1 by default?",
+       prompt:"",
+       a:"F1 weights precision and recall equally, which asserts that a false alarm and a miss cost the same. That's rarely true, and using F1 without checking it substitutes a convenient default for the cost question that actually should be asked. It's also a single number summarizing a whole tradeoff curve at one arbitrary threshold. If the cost ratio is known, a weighted F-beta or separately reported precision and recall at an operationally chosen threshold communicates far more."},
+      {q:"When does a high AUC mislead you?",
+       prompt:"",
+       a:"Under severe class imbalance. AUC uses the false positive rate, whose denominator is the total number of negatives, so with millions of negatives even a large absolute count of false alarms barely moves the rate. You can post an impressive AUC while the model produces far more false alarms than true detections at any usable threshold. For rare-positive problems, the precision-recall curve and its area are more informative because precision's denominator is what you actually flagged. AUC also says nothing about calibration or about which threshold to deploy."},
+      {q:"How would you choose an operating threshold for a deployed detector?",
+       prompt:"",
+       a:"Not from the model — from the consequences. I'd get the relative cost of a miss versus a false alarm from whoever bears them, and the volume of cases expected, since a 5% false positive rate means something different across a thousand versus a billion inputs. Then pick the point on the precision-recall curve that minimizes expected cost at that volume, using validation data rather than the test set. I'd also check that performance holds across relevant subgroups, since a threshold tuned on aggregate data can behave badly on a subset that matters."}
+    ]
+  }
+  ]
+},
+
+/* ============================================================
+   COURSE 3 — Vision Foundations (Stage A)
+   Sources: Szeliski CV2e, Elgendy DL4VS, Prince UDL, Starmer StatQuest
+   Page numbers are PDF pages in Andrew's uploaded files.
+   ============================================================ */
+{
+  id:"vision-a",
+  title:"Vision Foundations",
+  sub:"Stage A — From photons to learned filters",
+  requires:"grokking-ml",
+  note:"Drawn from four books. Each lesson cites the source and page so you can go deeper where you want to.",
+  sessions:[
+
+  /* ---------- VA1 ---------- */
+  {
+    id:"v1", n:"Session 1", title:"What an Image Actually Is",
+    blurb:"Photons to pixels, and why the sensor pipeline matters for your models.",
+    screens:[
+      {h:"Starting further back than usual", body:[
+        "Most machine learning treatment of images starts with an array of numbers and proceeds from there. That skips something worth having, because the array is the end of a long physical process and the properties of that process shape what your model can and can't learn.",
+        "For orbital imagery this isn't academic. Illumination geometry, sensor response, and compression all leave signatures in your data, and a network is perfectly happy to learn those instead of the thing you care about."
+      ]},
+      {h:"A pixel is an integral, not a point", body:[
+        "The intuitive picture is that a pixel is a sample of the scene at a point. It isn't. A pixel is the total light collected over a small area of the sensor during the exposure, converted to a number.",
+        "That distinction matters. Two scenes with different fine structure can produce identical pixel values if the structure averages out the same way. Information below the sampling scale is not degraded, it's absent.",
+        "So when a feature in your imagery approaches the pixel scale, no model recovers it. That's a physical limit, not a training problem, and knowing where it sits is part of framing the task honestly."
+      ]},
+      {h:"Aliasing", body:[
+        "Related, and more insidious. When a scene contains detail finer than the sampling rate, that detail doesn't just disappear. It reappears as false structure at a coarser scale.",
+        "The visible version is the moiré pattern you see photographing a striped shirt. The invisible version is fine terrain texture producing apparent periodic structure that isn't in the ground.",
+        "The standard defense is blurring slightly before downsampling, which removes detail too fine to represent before it can fold back as an artifact. That's why naive image resizing is a real hazard: resizing by dropping pixels, without pre-filtering, manufactures structure.",
+        ["aside","Directly relevant to you","Every resize in a preprocessing pipeline is a place where this can happen. If tiles are downsampled to fit a network's input size using a method that skips the pre-filter, the network may be learning aliasing artifacts that correlate with terrain type."],
+        ["src","Szeliski, <b>Computer Vision</b> 2e, ch. 2, pp. 59–131 for image formation; the digital camera pipeline at pp. 105–127."]
+      ]},
+      {h:"Where the numbers come from", body:[
+        "Between photons and your array sits a pipeline, and each stage is a chance for something to be introduced that isn't scene content.",
+        "Light hits the sensor and produces charge. Charge is read out and digitized, adding read noise. Some cameras apply a color filter array, so most pixels measure one color and the rest is interpolated, which manufactures correlations between neighboring pixels. Then gamma correction reshapes the values nonlinearly. Then compression discards information judged perceptually unimportant.",
+        "The last one deserves attention. JPEG compression works on blocks and introduces block-edge artifacts and ringing near sharp transitions. A network trained on compressed imagery can key on compression signatures, and if compression settings differ between your training and deployment sources, that dependence breaks silently."
+      ]},
+      {h:"Noise is not one thing", body:[
+        "Two distinct kinds, and they behave differently.",
+        "<strong>Shot noise</strong> comes from the quantum nature of light. Photon arrivals are random, so even a perfectly uniform scene produces varying counts. Its magnitude scales with the square root of the signal, which means dark regions are proportionally noisier than bright ones.",
+        "<strong>Read noise</strong> is added by the electronics during readout and is roughly constant regardless of signal.",
+        "The consequence for modeling: noise in an image is not uniform across the image. Shadowed terrain is intrinsically noisier than illuminated terrain, so a detector's confidence should arguably differ between them, and a model evaluated only in aggregate can hide poor performance in exactly the low-signal regions where features are hardest."
+      ]},
+      {h:"Illumination geometry", body:[
+        "What a surface looks like depends on where the light is and where the camera is, not only on the surface.",
+        "For orbital imagery this is a first-order effect. The same terrain photographed at different solar incidence angles produces different shadow lengths, different apparent relief, and different contrast. A fracture that's obvious under low sun can be nearly invisible under high sun.",
+        ["aside","The trap worth naming","If incidence angle correlates with anything else in your dataset — season, latitude, which images got processed when — a model can learn to use illumination as a shortcut. It will appear to detect features while actually detecting lighting conditions, and it will fail on new acquisitions with different geometry."],
+        ["src","Szeliski, ch. 2.2, <b>Photometric image formation</b>, pp. 92–105."]
+      ]},
+      {h:"Reading note", body:[
+        "Szeliski chapter 2 is dense and you don't need all of it. Read 2.2 on photometric formation and 2.3 on the digital camera. Skim 2.1 on geometric primitives unless you're doing registration work.",
+        "This is the material a deep-learning-first practitioner typically never encounters, and it's where your instincts about data quality come from."
+      ]}
+    ],
+    questions:[
+      {q:"Why might a detector trained on one set of orbital images fail on a new acquisition of the same terrain?",
+       prompt:"Name at least three mechanisms.",
+       a:"Illumination geometry: different solar incidence changes shadow length and apparent relief, so the same feature presents differently. Sensor and processing differences: gain settings, compression level, and resampling method leave signatures a network can key on. Resolution and resampling: if ground sample distance differs, features occupy different pixel counts than the model learned. Noise characteristics: different exposure changes the shot-to-read noise balance, particularly in shadowed regions. Any of these can produce a model that appears to detect a feature while actually keying on acquisition conditions.",
+       cite:"Szeliski ch. 2.2–2.3, pp. 92–127."},
+      {q:"What is aliasing, and where does it get introduced in a typical ML preprocessing pipeline?",
+       prompt:"",
+       a:"Aliasing is detail finer than the sampling rate reappearing as false structure at a coarser scale, rather than simply being lost. In a preprocessing pipeline the usual entry point is resizing: downsampling by dropping or naively interpolating pixels, without first low-pass filtering to remove content too fine to represent. The manufactured structure can correlate with terrain type or texture, so a model may learn artifacts of the resize rather than the scene. The fix is blurring appropriately before downsampling, which most well-implemented resize functions do but not all.",
+       cite:"Szeliski ch. 3, pp. 133–216; sampling and aliasing in the image processing chapter."},
+      {q:"Why is a pixel better thought of as an integral than a sample?",
+       prompt:"",
+       a:"A pixel records the total light collected over a finite sensor area during a finite exposure, not the scene value at an infinitesimal point. Structure that varies within that area is averaged, so distinct scenes can produce identical values. The practical consequence is a hard information limit: features approaching the pixel scale aren't degraded but absent, and no amount of model capacity recovers them. Knowing where that limit falls for your instrument tells you which detection tasks are physically possible before any modeling question arises.",
+       cite:"Szeliski ch. 2.3, <b>The digital camera</b>, pp. 105–127."},
+      {q:"Shot noise scales with the square root of signal. What does that imply for evaluating a detector?",
+       prompt:"",
+       a:"Noise is not uniform across an image — low-signal regions like shadows are proportionally noisier than bright ones, so features there are intrinsically harder to detect. An aggregate performance number averages over both regimes and can conceal systematically poor performance in the dark regions, which are often exactly where certain features are visible or where the scientific interest sits. The response is to stratify evaluation by signal level or illumination condition rather than reporting a single pooled score.",
+       cite:"Szeliski ch. 2.3.3 on sensor noise, within pp. 105–127."}
+    ]
+  },
+
+  /* ---------- VA2 ---------- */
+  {
+    id:"v2", n:"Session 2", title:"Filtering and Convolution",
+    blurb:"What convolution does mechanically, decades before anyone learned the filters.",
+    screens:[
+      {h:"The operation, before the learning", body:[
+        "Convolution is old. It was doing useful work in image processing long before neural networks, and understanding it as an image operation first makes the learned version much less mysterious.",
+        "The operation: take a small grid of numbers, call it a <strong>kernel</strong>. Slide it over the image. At each position, multiply each kernel value by the pixel underneath it, add the products, and write the sum to the output.",
+        "That's the whole mechanism. Everything about convolutional networks is this operation with the kernel values learned rather than chosen."
+      ]},
+      {h:"What different kernels do", body:[
+        "A kernel of all equal positive values averages the neighborhood. The output is a blurred image, because each pixel becomes the mean of its surroundings.",
+        "A kernel with positive values on one side and negative on the other computes a difference across that direction. Where the image is flat the positives and negatives cancel and the output is near zero. Where there's an edge they don't cancel and the output is large.",
+        "That's an <strong>edge detector</strong>, and it falls straight out of the arithmetic. No learning involved. A kernel that responds to horizontal edges is one that differences vertically, and vice versa.",
+        ["src","Szeliski, ch. 3.2, <b>Linear filtering</b>, pp. 145–157. Worked kernel examples throughout."]
+      ]},
+      {h:"Why this is the right operation for images", body:[
+        "Two properties, and they're the reason convolution beats a fully connected layer on images.",
+        "<strong>Locality.</strong> A pixel's meaning depends mostly on its neighbors, not on pixels far across the image. A kernel only looks at a neighborhood, which builds that assumption in.",
+        "<strong>Translation equivariance.</strong> The same kernel is applied everywhere, so a feature produces the same response wherever it appears. Shift the input and the output shifts identically. A fully connected layer would have to learn the feature separately at every position.",
+        "The cost saving is enormous. A fully connected layer on a modest image needs millions of parameters per layer. A convolutional layer with a small kernel needs a few dozen, reused everywhere.",
+        ["src","Prince, <b>Understanding Deep Learning</b>, ch. 10.1, <b>Invariance and equivariance</b>, pp. 175–177."]
+      ]},
+      {h:"Equivariance is not invariance", body:[
+        "A distinction people blur and interviewers probe.",
+        "<strong>Equivariance</strong> means the output transforms the same way the input did. Shift the image, the feature map shifts. Convolution is equivariant to translation.",
+        "<strong>Invariance</strong> means the output doesn't change at all. Shift the image, the answer stays the same. That's what you want from a classifier: a junction is a Y junction regardless of where in the tile it sits.",
+        "Convolution alone gives equivariance. Invariance comes from what you stack on top — pooling, striding, and eventually global aggregation, each discarding a bit of position information until the final answer no longer depends on it.",
+        ["aside","Worth being careful here","Convolution is equivariant to translation and to nothing else. It is not rotation equivariant. A kernel that fires on a horizontal edge does not fire on the same edge rotated 45 degrees; the network has to learn separate kernels for each orientation. For junction detection, where orientation varies arbitrarily, that's a real cost paid in capacity and training data."]
+      ]},
+      {h:"Padding, stride, and output size", body:[
+        "Three mechanical details that cause a large share of shape bugs.",
+        "<strong>Padding.</strong> A kernel centered on an edge pixel hangs off the image. Either you skip those positions, shrinking the output, or you pad the border with invented values. Zero padding is standard and introduces a mild artifact: the network sees an artificial dark border and can learn to use it.",
+        "<strong>Stride.</strong> How far the kernel moves between positions. Stride 1 evaluates every position. Stride 2 skips every other one, halving the output dimensions and downsampling as a side effect.",
+        "<strong>Receptive field.</strong> How much of the original image influences one output value. One 3×3 layer sees 3×3. Stack two and each output sees 5×5. Stack many and the receptive field grows, which is how a network built from tiny kernels eventually responds to large structures.",
+        ["src","Elgendy, <b>Deep Learning for Vision Systems</b>, ch. 3.3, <b>Basic components of a CNN</b>, pp. 127–142. Prince ch. 10.2–10.4, pp. 177–188."]
+      ]},
+      {h:"The 3D detail people get wrong", body:[
+        "For a color image, or any multi-band input, a kernel is not 2D. It has depth matching the input's channel count, so a 3×3 kernel on a 3-channel image is 3×3×3 and produces a single number per position, not three.",
+        "So one kernel produces one output channel regardless of how many input channels there were. To get many output channels you use many kernels, each with full input depth.",
+        "This is where tensor shape confusion usually starts, and it's worth being able to compute the parameter count of a conv layer from memory: kernel height times width times input channels, plus one bias, all times the number of output channels.",
+        ["src","Elgendy, ch. 3.6, <b>Convolution over color images (3D images)</b>, pp. 149–154."]
+      ]},
+      {h:"Reading note", body:[
+        "Szeliski 3.2 for the classical view, Elgendy 3.3 and 3.6 for the network view, Prince 10.1 to 10.4 for the principled account of why convolution suits images.",
+        "Starmer's chapter 6 on CNNs, printed pages 128–140, covers the same ground with the gentlest on-ramp if any of it feels slippery."
+      ]}
+    ],
+    questions:[
+      {q:"Explain convolution to someone who has never seen it, without using the word filter.",
+       prompt:"",
+       a:"Take a small grid of numbers and lay it over one small patch of the image. Multiply each number in the grid by the pixel value underneath it, add all those products together, and write that single number to a new image. Then slide the grid over by one pixel and repeat, covering the whole image. The result is a new image where each value summarizes a small neighborhood of the original, and what it summarizes depends entirely on the numbers in the grid — averaging them blurs, differencing them across a direction finds edges.",
+       cite:"Szeliski ch. 3.2, pp. 145–157."},
+      {q:"Why is convolution better suited to images than a fully connected layer?",
+       prompt:"",
+       a:"Two built-in assumptions that happen to be true of images. Locality: a pixel's meaning depends mostly on nearby pixels, and a small kernel encodes that directly rather than having to learn it. Translation equivariance: the same kernel applies at every position, so a feature learned once is detected everywhere, whereas a fully connected layer must learn it separately per location. The parameter cost differs by orders of magnitude — dozens of weights reused across the image versus millions of independent ones — which matters enormously when labeled data is limited.",
+       cite:"Prince ch. 10.1, pp. 175–177."},
+      {q:"Distinguish equivariance from invariance, and say which one convolution gives you.",
+       prompt:"Interviewers use this to separate people who know the terms from people who use them loosely.",
+       a:"Equivariance means the output transforms the same way the input did — shift the image and the feature map shifts correspondingly. Invariance means the output doesn't change at all under the transformation. Convolution is equivariant to translation, not invariant. Invariance to position is built up by what follows: pooling, strided downsampling, and eventually global pooling, each discarding location information until the final prediction no longer depends on where the feature sat. Note that convolution gives neither property for rotation.",
+       cite:"Prince ch. 10.1, pp. 175–177."},
+      {q:"A 3×3 convolution on a 64-channel input producing 128 output channels — how many parameters?",
+       prompt:"Compute it before revealing.",
+       a:"73,856. Each kernel spans the full input depth, so it holds 3 × 3 × 64 = 576 weights, plus one bias, giving 577 per output channel. With 128 output channels that's 577 × 128 = 73,856. The key structural point is that kernel depth always matches input channels and one kernel yields one output channel, which is the detail most people get wrong when they picture a 3×3 kernel as flat.",
+       cite:"Elgendy ch. 3.6, pp. 149–154."},
+      {q:"What's the receptive field, and why does it matter for detecting a feature that spans many pixels?",
+       prompt:"",
+       a:"The receptive field is the region of the original input that influences a single output value. One 3×3 layer sees a 3×3 region; stacking two makes it 5×5, and it grows with depth, faster with striding or pooling. It matters because a unit can only respond to structure that fits inside its receptive field. If the feature of interest spans a larger area than any unit sees, the network cannot represent it as a single entity regardless of training. That constrains architecture depth and downsampling choices given the pixel scale of your target features.",
+       cite:"Prince ch. 10.2–10.4, pp. 177–188."},
+      {q:"Zero padding introduces an artifact. What is it and when does it matter?",
+       prompt:"",
+       a:"Padding invents border values, usually zeros, so kernels can be centered on edge pixels. The network sees an artificial dark frame that never occurs in real content, and it can learn to use border position as a cue. It matters most when the object of interest can appear near tile edges, and when tiling a large image into patches, since every patch boundary becomes a synthetic edge that wasn't there in the source. Reflection padding or overlapping tiles with cropped predictions mitigate it.",
+       cite:"Elgendy ch. 3.3, pp. 127–142."}
+    ]
+  },
+
+  /* ---------- VA3 ---------- */
+  {
+    id:"v3", n:"Session 3", title:"Classical Feature Detection",
+    blurb:"Corners, edges, and junctions — the pre-deep-learning approach, and why it still matters.",
+    screens:[
+      {h:"Why bother with the old way", body:[
+        "For twenty years before deep learning, computer vision was largely about hand-designed feature detectors. Understanding them isn't nostalgia. Three reasons it pays.",
+        "It tells you what's actually hard about your problem, independent of any model. It gives you strong baselines that are fast and require no labels. And in interviews it distinguishes you from candidates who only know how to call a training loop.",
+        "For junction detection specifically, the classical literature is directly relevant, because corner and junction detection is one of the oldest problems in the field."
+      ]},
+      {h:"What makes a good feature", body:[
+        "The classical criteria are worth internalizing because they apply to learned features too.",
+        "<strong>Repeatable.</strong> The same physical structure should be detected again in another image of the same scene, under different lighting or viewpoint.",
+        "<strong>Distinctive.</strong> The description should differ enough between different structures to tell them apart.",
+        "<strong>Local.</strong> Based on a small region, so occlusion elsewhere doesn't destroy it.",
+        "<strong>Efficient.</strong> Cheap enough to compute densely.",
+        "A learned detector is judged on the same properties. It just discovers rather than encodes them.",
+        ["src","Szeliski, ch. 7.1, <b>Points and patches</b>, pp. 445–481."]
+      ]},
+      {h:"The corner detection insight", body:[
+        "This one idea is worth knowing precisely, because it generalizes.",
+        "Take a small window and slide it slightly in every direction. Ask how much the content changes.",
+        "In a flat region, nothing changes in any direction. Uninformative.",
+        "On an edge, sliding along the edge changes nothing, but sliding across it changes a lot. So there's one direction of no change. You can't localize position along the edge.",
+        "At a corner, sliding in any direction changes the content. That's what makes corners good landmarks: they're localizable in two dimensions.",
+        "The Harris detector formalizes exactly this by examining the local gradient structure and asking whether variation is large in both directions. Two large values means a corner. One large, one small means an edge. Both small means flat.",
+        ["src","Szeliski, ch. 7.1.1 on the Harris detector and its variants, within pp. 445–481."]
+      ]},
+      {h:"Why junctions are harder than corners", body:[
+        "Your problem is not quite corner detection, and the difference is worth articulating.",
+        "A corner is where two edges meet. A T, Y, or X junction is where three or more edges meet, and the classification depends on <em>how many</em> meet and at <em>what angles</em>.",
+        "That makes the task compound. Localize the junction, then count the incident branches, then measure their angular arrangement. A corner detector fires at all of them without distinguishing type, so detection alone doesn't solve it.",
+        "It's also why the problem suits learning. Encoding \"three branches at roughly 120 degrees, unless one is faint, unless the fracture is partially buried\" by hand is exactly the kind of rule that resists explicit specification and yields to examples.",
+        ["aside","A useful interview move","Being able to explain why your problem resisted the classical approach, in terms of the classical approach's actual mechanics, is far more convincing than saying you used a CNN because CNNs work well."]
+      ]},
+      {h:"Edges and contours", body:[
+        "Edge detection is the other classical thread that bears on fracture networks.",
+        "An edge is a location of rapid intensity change, so detecting one means finding large gradients. The complication is scale: gradients are noisy, so you smooth first, and how much you smooth determines which edges survive. Smooth a little and you get every texture boundary plus noise. Smooth a lot and you get only major structures.",
+        "The Canny detector is the classical answer, combining smoothing, gradient computation, thinning the response to single-pixel width, and then linking with two thresholds so that weak edges connected to strong ones are kept while isolated weak ones are dropped.",
+        "That hysteresis idea, trusting a weak signal when it connects to a confident one, is a genuinely good idea that reappears in modern post-processing.",
+        ["src","Szeliski, ch. 7.2, <b>Edges and contours</b>, pp. 481–492; contour tracking pp. 492–503."]
+      ]},
+      {h:"Scale", body:[
+        "A structure that's an edge at one scale is texture at another and invisible at a third. Classical vision handles this with <strong>scale space</strong>: process the image at multiple resolutions and detect features at whichever scale they're most salient.",
+        "This is why image pyramids exist, and the idea carries straight into modern architectures. Feature pyramid networks in detection are the same principle with learned features.",
+        "For your work the practical question is which scale your junctions live at, and whether it's consistent across your imagery. If ground sample distance varies between acquisitions, the same physical junction occupies different pixel counts, and a single-scale model handles that badly.",
+        ["src","Szeliski, ch. 3.5, <b>Pyramids and wavelets</b>, pp. 175–194."]
+      ]},
+      {h:"Reading note", body:[
+        "Szeliski chapter 7 is the core of this session. Sections 7.1 and 7.2 are the ones to read properly.",
+        "Worth doing a classical baseline at a desk sometime: run Harris and Canny over a few of your tiles and look at where they fire. It's an hour's work and it tells you what your learned detector is competing against."
+      ]}
+    ],
+    questions:[
+      {q:"Why is a corner a better landmark than a point on an edge?",
+       prompt:"",
+       a:"Because it's localizable in two dimensions. If you shift a small window along an edge, the content barely changes, so you can't tell where along the edge you are — the position is ambiguous in one direction. At a corner, shifting in any direction changes the content, so the position is pinned in both dimensions. The Harris detector formalizes this by examining local gradient structure: variation large in two directions means corner, large in one means edge, small in both means flat region.",
+       cite:"Szeliski ch. 7.1.1, within pp. 445–481."},
+      {q:"Why doesn't a classical corner detector solve T/Y/X junction classification?",
+       prompt:"This is your own problem — be able to answer it precisely.",
+       a:"A corner detector responds to points where local gradient structure varies in multiple directions, which junctions do, so it fires at them. But it doesn't distinguish how many branches meet or at what angles, and that arrangement is exactly what separates T from Y from X. The task is compound: localize, then count incident branches, then characterize their angular geometry, under degraded conditions where branches may be faint or partially buried. Hand-specifying rules that survive those degradations is what resists the classical approach and favors learning from examples.",
+       cite:"Szeliski ch. 7.1–7.2, pp. 445–503."},
+      {q:"What does the hysteresis step in Canny edge detection do, and why is it a good idea?",
+       prompt:"",
+       a:"It uses two thresholds instead of one. Pixels above the high threshold are accepted as edges outright. Pixels between the two are accepted only if they connect to an already-accepted edge. This exploits the fact that real edges are continuous structures while noise responses are isolated, so a weak signal gains credibility from its context. It's a general principle worth carrying beyond Canny: a marginal detection that's spatially consistent with a confident one deserves more trust than the same detection standing alone, which applies directly to linking fracture segments.",
+       cite:"Szeliski ch. 7.2, pp. 481–492."},
+      {q:"Why would you build a classical baseline before training a network?",
+       prompt:"",
+       a:"It costs a few hours, needs no labels, and tells you what the learned model has to beat to be worth its complexity. It also diagnoses the problem: if Harris and Canny already localize most of your targets, the hard part is classification rather than detection, which changes the architecture. And it exposes data problems early, since a classical detector's failures are interpretable in a way a network's are not. In an interview, having run one signals you chose deep learning rather than defaulting to it.",
+       cite:"Szeliski ch. 7, pp. 443–526."},
+      {q:"What is scale space and where does the idea resurface in modern architectures?",
+       prompt:"",
+       a:"Scale space is representing an image at multiple resolutions so features can be detected at whichever scale they're most salient, since a structure that reads as an edge at one scale is texture at another. Classically it's the image pyramid. In modern detection it reappears as feature pyramid networks, which combine feature maps from multiple depths so small and large objects are both handled. It matters practically when ground sample distance varies across acquisitions, since the same physical structure then spans different pixel counts and a single-scale model generalizes poorly.",
+       cite:"Szeliski ch. 3.5, pp. 175–194."}
+    ]
+  },
+
+  /* ---------- VA4 ---------- */
+  {
+    id:"v4", n:"Session 4", title:"From Chosen Filters to Learned Filters",
+    blurb:"What actually changed with CNNs, and what a network learns in its early layers.",
+    screens:[
+      {h:"The one change", body:[
+        "Classical vision chose kernel values by hand. Someone worked out that a particular arrangement of positives and negatives detects horizontal edges, and wrote it down.",
+        "A convolutional network uses the identical operation and learns the kernel values from data instead.",
+        "That's the entire conceptual difference. Everything else — depth, pooling, normalization — is engineering built around that one substitution."
+      ]},
+      {h:"What they actually learn", body:[
+        "The finding that made this credible: when you visualize the kernels a trained network learns in its first layer, they look like classical edge and blob detectors. Oriented gradients, center-surround patterns, color opponency.",
+        "The network rediscovers, from data alone, roughly what decades of hand design converged on. That's a meaningful validation of both.",
+        "Deeper layers are different. They combine early responses into progressively more complex patterns — textures, then parts, then object-level structure. Nobody specified that hierarchy; it emerges because composition is the cheapest way to satisfy the objective.",
+        ["src","Elgendy, ch. 3.2, <b>CNN architecture</b>, pp. 123–127; feature hierarchy discussion in ch. 5.1, pp. 218–220."]
+      ]},
+      {h:"Why depth rather than width", body:[
+        "You could imagine one enormous convolutional layer with huge kernels. In practice, stacking many small ones works far better, for reasons worth being able to state.",
+        "<strong>Parameter efficiency.</strong> Two stacked 3×3 layers cover the same 5×5 receptive field as one 5×5 layer, using fewer parameters.",
+        "<strong>More nonlinearity.</strong> Each layer is followed by a nonlinear activation, so more layers means more nonlinear steps and a richer function class for the same footprint.",
+        "<strong>Reuse.</strong> An intermediate feature can serve many downstream computations, so composition is cheaper than computing each high-level feature independently.",
+        ["src","Prince, ch. 10, pp. 175–199. Elgendy ch. 5.4 on VGGNet, pp. 233–238, which made the small-kernel argument concrete."]
+      ]},
+      {h:"Pooling and what it costs", body:[
+        "<strong>Pooling</strong> reduces spatial dimensions by summarizing each small region with one value, usually its maximum.",
+        "Two things it buys. It shrinks the representation, cutting computation. And it introduces local translation invariance, since the maximum over a region is unchanged by small shifts within that region.",
+        "What it costs is precision of location. Every pooling step discards information about exactly where within the region the response occurred.",
+        ["aside","A real tension for your work","Classification wants invariance — the type is the same wherever the junction sits. Localization wants the position preserved. Aggressive pooling helps the first and hurts the second, which is why detection and segmentation architectures either pool less, or pool and then upsample with skip connections carrying the fine detail forward."],
+        ["src","Prince, ch. 10.5, <b>Downsampling and upsampling</b>, pp. 185–188."]
+      ]},
+      {h:"The nonlinearity", body:[
+        "Between convolutions sits an activation function, and its necessity is structural rather than incidental.",
+        "Convolution is a linear operation. Stack two linear operations and the result is still linear, equivalent to a single one. Without something nonlinear between them, depth buys nothing at all — a hundred-layer linear network has exactly the expressive power of one layer.",
+        "The standard choice, ReLU, is about as simple as possible: pass positive values through unchanged, output zero for negatives. Cheap, and it avoids the vanishing-gradient behavior of the smooth alternatives it replaced.",
+        "Its known failure is that a unit which outputs zero for all inputs receives no gradient and can never recover, a dead unit. Variants like leaky ReLU exist to prevent it.",
+        ["src","Prince, ch. 3, <b>Shallow neural networks</b>, pp. 39–54, for why nonlinearity is what makes depth meaningful."]
+      ]},
+      {h:"Putting a network together", body:[
+        "The classical pattern, still the backbone of most vision architectures: alternate convolution and activation, periodically downsample, and let the number of channels grow as spatial dimensions shrink.",
+        "That trade is deliberate. Early layers keep high spatial resolution with few channels, because early features are simple and their position matters. Later layers have low spatial resolution and many channels, because late features are complex and abstract and their exact position matters less.",
+        "The end of the network depends on the task. Classification flattens or globally pools and attaches a small dense classifier. Detection attaches heads predicting boxes and classes at multiple scales. Segmentation upsamples back to input resolution.",
+        ["src","Elgendy, ch. 3.2–3.4, pp. 123–145. Prince ch. 10.6, <b>Applications</b>, pp. 188–193."]
+      ]},
+      {h:"Reading note", body:[
+        "Elgendy chapter 3 is the most readable full account and it's project-oriented. Prince chapter 10 is the more principled treatment of the same material and worth reading second.",
+        "Starmer chapter 6, printed pages 128–140, is the gentlest version if you want the idea before the detail."
+      ]}
+    ],
+    questions:[
+      {q:"What's the actual difference between a classical filter bank and a CNN's first layer?",
+       prompt:"",
+       a:"The operation is identical — a small kernel convolved across the image. The difference is only where the kernel values come from: hand-derived from analysis versus learned by gradient descent from labeled examples. The striking empirical result is that trained first layers converge on filters resembling the classical ones — oriented edge detectors, center-surround blobs — so the network rediscovers what decades of design arrived at. The real gain from learning appears deeper, where composed features have no clean hand-designed equivalent.",
+       cite:"Elgendy ch. 3.2, pp. 123–127."},
+      {q:"Why stack small kernels instead of using one large one?",
+       prompt:"",
+       a:"Two 3×3 layers span the same 5×5 receptive field as a single 5×5 layer but use fewer parameters, and the gap widens with depth. Stacking also inserts an extra nonlinearity between the layers, so the composed function is richer than any single linear filter of the same extent. And intermediate features get reused by multiple downstream computations rather than each large filter working independently. VGGNet made this argument concrete and it became standard design.",
+       cite:"Prince ch. 10, pp. 175–199; Elgendy ch. 5.4, pp. 233–238."},
+      {q:"What does pooling cost you, and when is that cost unacceptable?",
+       prompt:"",
+       a:"It discards where within the pooled region the response occurred, trading spatial precision for invariance and reduced computation. That's acceptable for whole-image classification, where the answer shouldn't depend on position. It's a problem for localization tasks — detection and segmentation — where you need to report where something is, and for any task where features are small relative to the pooling extent. Detection and segmentation architectures respond by pooling less, or by upsampling afterward with skip connections that carry high-resolution detail past the bottleneck.",
+       cite:"Prince ch. 10.5, pp. 185–188."},
+      {q:"Why does a network need nonlinear activations at all?",
+       prompt:"",
+       a:"Because composing linear operations yields a linear operation. Without a nonlinearity between layers, a network of any depth collapses mathematically to a single linear transformation, so depth adds parameters but no expressive power. The activation breaks that collapse and is what makes stacking meaningful. ReLU is the common choice because it's cheap and doesn't saturate for positive inputs, avoiding the vanishing gradients that plagued sigmoid-based deep networks; its own failure mode is units that output zero for every input and stop receiving gradient entirely.",
+       cite:"Prince ch. 3, pp. 39–54."},
+      {q:"Why do channels typically increase as spatial resolution decreases?",
+       prompt:"",
+       a:"It balances what each stage needs to represent against compute. Early layers hold simple features whose position matters, so they keep high spatial resolution but need few channels because there aren't many distinct simple patterns. Later layers hold complex, abstract features where exact position matters less but variety is much greater, so spatial extent is traded for channel count. It also keeps per-layer computation roughly stable, since halving each spatial dimension quarters the positions and doubling channels partly offsets that.",
+       cite:"Elgendy ch. 3.2–3.4, pp. 123–145."}
+    ]
+  },
+
+  /* ---------- VA5 ---------- */
+  {
+    id:"v5", n:"Session 5", title:"Data, Augmentation, and Leakage",
+    blurb:"Where vision projects actually fail, and it isn't the architecture.",
+    screens:[
+      {h:"The unglamorous truth", body:[
+        "Architecture choice gets the attention. In practice, most vision projects succeed or fail on data handling, and the failures are quiet.",
+        "This session is the one whose content you're most likely to be asked about in an interview for applied work, because it's what separates people who've shipped something from people who've completed tutorials."
+      ]},
+      {h:"Augmentation, and what it encodes", body:[
+        "<strong>Data augmentation</strong> means transforming training images to create more examples: flips, rotations, crops, brightness changes, noise.",
+        "The framing that matters: each augmentation is a claim about what shouldn't change the answer. Flipping horizontally asserts that a mirrored junction is still the same junction type. Adjusting brightness asserts that illumination doesn't change the label.",
+        "So augmentation isn't free data. It's a way of injecting domain knowledge about invariances, and it's only valid where the claim is true.",
+        ["aside","Where it goes wrong","If you augment with a transformation that does change the correct label, you're training the model to ignore a real distinction. Vertical flips are fine for orbital imagery and wrong for photographs of text. Rotation is fine for junctions and wrong for digit recognition, where 6 and 9 differ by rotation."],
+        ["src","Elgendy, ch. 4.3, <b>Getting your data ready for training</b>, pp. 172–177. Prince ch. 9.3, heuristics including augmentation, pp. 158–168."]
+      ]},
+      {h:"Leakage, the general form", body:[
+        "<strong>Leakage</strong> is any path by which information from your evaluation data influences training. It produces high scores that don't survive deployment, and it never raises an error.",
+        "The obvious form is having the same image in both sets. The dangerous forms are subtler.",
+        "<strong>Preprocessing leakage.</strong> Compute a normalization statistic — mean, standard deviation, percentile clip — over the whole dataset, and your training data has absorbed information about the test set. Every such statistic must be computed on training data only and then applied to the others.",
+        "<strong>Selection leakage.</strong> Choose which features or bands to keep by looking at performance across all data, and the selection has seen the test set.",
+        "<strong>Temporal leakage.</strong> With time-ordered data, a random split lets the model train on the future and predict the past."
+      ]},
+      {h:"Spatial leakage, specifically", body:[
+        "The form that matters most for your work, and the one generic ML advice never mentions.",
+        "Tiles cut from the same image are not independent samples. They share illumination, atmospheric state, instrument configuration, terrain type, and often overlap outright.",
+        "Split randomly and near-identical tiles land on both sides. The model can score well by recognizing the scene rather than the feature, and your test number is inflated by an amount you cannot determine after the fact.",
+        "The fix is to split at the level of the genuinely independent unit. For orbital imagery that usually means splitting by source image or by geographic region, so test tiles come from scenes the model has never encountered in any form.",
+        ["aside","This is your strongest interview card","It's a place where domain knowledge beats ML technique outright. Someone who only knows algorithms splits randomly and reports a great, meaningless number. Being the person who catches it is precisely the applied-scientist value proposition."]
+      ]},
+      {h:"Class imbalance in detection", body:[
+        "Detection has an imbalance problem worse than classification's, and it's structural.",
+        "A detector evaluates many candidate locations per image. The overwhelming majority contain no object. So the negative class outnumbers the positive by orders of magnitude, and a loss that treats all locations equally is dominated by easy negatives — background patches the model already classifies confidently.",
+        "The classical responses are hard negative mining, which trains on the negatives the model currently gets wrong, and focal loss, which down-weights well-classified examples so the gradient concentrates on hard cases.",
+        ["src","Elgendy, ch. 7.1, <b>General object detection framework</b>, pp. 306–313, and the SSD discussion at pp. 331–341."]
+      ]},
+      {h:"Labels are data too", body:[
+        "A model cannot be better than the labels it learned from, and label quality is measurable rather than assumed.",
+        "Worth knowing for your own data: how consistent are two annotators on the same tile? That inter-annotator agreement is an approximate ceiling on achievable performance. If two experts agree on junction type 85% of the time, a model reporting 95% agreement with one annotator is telling you something odd — most likely it learned that annotator's idiosyncrasies.",
+        "It also reframes the evaluation. A disagreement between model and label isn't automatically a model error. Sometimes it's a label error, and separating those requires looking at cases rather than at aggregate numbers.",
+        ["src","Elgendy, ch. 4.1, <b>Defining performance metrics</b>, pp. 167–170, and 4.4 on interpreting performance, pp. 177–183."]
+      ]},
+      {h:"Reading note", body:[
+        "Elgendy chapter 4 is the practical core here and the most immediately useful chapter in that book. Prince chapter 9 covers regularization including augmentation more formally.",
+        "The spatial leakage material is not in any of the four books. That's a gap in the literature you happen to sit on the right side of."
+      ]}
+    ],
+    questions:[
+      {q:"What is data augmentation actually doing, conceptually?",
+       prompt:"",
+       a:"Encoding invariances you believe hold. Each transformation asserts that a particular change to the input shouldn't change the correct output, and training on transformed copies pushes the model toward respecting that. It's a way of injecting domain knowledge, not a way of manufacturing information. Its validity depends entirely on the assertion being true: a transformation that does alter the correct label trains the model to ignore a real distinction, which is why the appropriate augmentation set is domain-specific rather than a standard recipe.",
+       cite:"Prince ch. 9.3, pp. 158–168; Elgendy ch. 4.3, pp. 172–177."},
+      {q:"Give me three forms of leakage that don't involve duplicate images.",
+       prompt:"",
+       a:"Preprocessing leakage: normalization statistics, imputation values, or clipping percentiles computed over the full dataset rather than the training portion, so training data encodes information about test data. Selection leakage: choosing features, bands, or architectures by comparing performance across all data, which lets the test set influence the model. Group or spatial leakage: samples that share a source — the same image, site, subject, or time window — split across train and test, so the model can succeed by recognizing the source rather than the target. All three inflate scores silently.",
+       cite:"Prince ch. 8, <b>Measuring performance</b>, pp. 132–151."},
+      {q:"Why does object detection have a worse class imbalance problem than classification?",
+       prompt:"",
+       a:"Because a detector scores many candidate locations per image and nearly all of them are background. The negative-to-positive ratio can be thousands to one, and it's structural rather than a property of the dataset. A loss summed uniformly over locations is dominated by easy negatives the model already handles, so gradient signal from the rare positives is swamped. The standard responses are hard negative mining, which restricts training to negatives currently misclassified, and focal loss, which down-weights confidently classified examples so learning concentrates on hard cases.",
+       cite:"Elgendy ch. 7.1, pp. 306–313."},
+      {q:"How would you set an upper expectation on model performance before training anything?",
+       prompt:"",
+       a:"Measure inter-annotator agreement on a sample. If two qualified annotators disagree on 15% of cases, the label set itself carries that much ambiguity, and a model can't meaningfully exceed it against those labels — a much higher reported score suggests it learned one annotator's idiosyncrasies rather than the underlying phenomenon. It also reframes error analysis: model-label disagreements aren't automatically model errors, and separating genuine misses from label noise requires inspecting cases rather than reading aggregate metrics.",
+       cite:"Elgendy ch. 4.1 and 4.4, pp. 167–183."},
+      {q:"You've been handed a vision model with a 94% test score and asked whether to deploy. What do you check?",
+       prompt:"An interviewer will keep asking 'what else' — have five answers ready.",
+       a:"How the split was made, specifically whether the independent unit was respected rather than splitting randomly across correlated samples. Whether any preprocessing statistic or model selection decision touched the test set. Class balance, and per-class recall rather than aggregate accuracy. Whether the test distribution matches deployment — different sensors, seasons, or acquisition conditions than training. And the failure cases themselves: whether errors cluster in an identifiable regime, since clustered failure is far more dangerous in deployment than uniformly distributed error at the same rate.",
+       cite:"Prince ch. 8, pp. 132–151; Elgendy ch. 4.4, pp. 177–183."}
+    ]
+  },
+
+  /* ---------- VA6 ---------- */
+  {
+    id:"v6", n:"Session 6", title:"Consolidation — Your Own Pipeline",
+    blurb:"Turn five sessions of concepts into an account of your own work you can defend.",
+    screens:[
+      {h:"What this session is for", body:[
+        "Everything in Stage A describes machinery you've already used. The purpose here isn't to learn it again — it's to be able to give an account of your own pipeline in the vocabulary an interviewer will use.",
+        "That translation is a real skill and it doesn't come automatically from having done the work. Plenty of people build good systems and then describe them badly."
+      ]},
+      {h:"The exercise", body:[
+        ["desk","Write a one-page technical account of your junction detection pipeline. Not a paper abstract — an engineering description, the kind you'd give a hiring manager who knows ML but not Mars.<br><br>It must cover: what the input data physically is and what its limits are; what preprocessing happens and why each step; how the task is framed as an ML problem and what the alternatives were; the architecture and why that one; how the data is split and why that scheme; what metrics are reported and why those; what the failure modes are.",
+         "One page. At a desk. The constraint is the point — it forces you to decide what matters."]
+      ]},
+      {h:"The hard questions to answer in it", body:[
+        "Six that an interviewer will reach for. Have an answer before you're asked.",
+        "Why is this a learning problem rather than a classical detection problem? Session 3 gives you the vocabulary.",
+        "What's your independent unit, and does your split respect it? Session 5.",
+        "What's the physical resolution limit on what you can detect? Session 1.",
+        "What invariances did you encode through augmentation, and are they all actually true of your data? Session 5.",
+        "How do you know the model isn't keying on illumination or acquisition conditions? Session 1.",
+        "What does your reported metric miss? Session 5, and the ML course's metrics session."
+      ]},
+      {h:"Then stress-test it", body:[
+        "Once written, hand it to Claude and ask for the strongest objections a skeptical reviewer would raise. Not a general critique — specifically, where would someone attack the validity of the result.",
+        "Then answer those objections in writing. The ones you can't answer are the real output of this session: they're either genuine weaknesses to address in the work, or gaps in how you're explaining it, and telling those two apart is worth the afternoon.",
+        "Keep the document. It's the raw material for interview answers, for the dissertation's methods framing, and for the FINESST narrative."
+      ]}
+    ],
+    questions:[
+      {q:"Describe your pipeline end to end in ninety seconds.",
+       prompt:"Out loud, timed. This is the single most-asked question in an applied scientist interview.",
+       a:"No model answer — this one is yours. A strong version moves through data, framing, method, validation, and result without dwelling on any one part, states one honest limitation, and doesn't assume the listener knows the domain. The common failure is spending sixty of the ninety seconds on Mars background. The listener is evaluating your engineering judgment, so the geology gets one sentence of framing and the rest goes to decisions you made and why."},
+      {q:"What would you do differently if you started this project again?",
+       prompt:"",
+       a:"Yours to answer, but be ready with something substantive. A non-answer, or a claim that you'd change nothing, reads as either inexperience or defensiveness. Strong answers name a specific decision, explain what you know now that you didn't then, and say what you'd do instead. Candidates for you: the labeling scheme and how inter-annotator agreement was established, the splitting strategy, whether the detection and classification stages should have been separate, or the scale at which tiles were cut."},
+      {q:"Someone claims your model is detecting illumination conditions rather than fractures. How do you refute it?",
+       prompt:"",
+       a:"Not by asserting it isn't — by showing evidence. Evaluate stratified by solar incidence angle and show performance is stable across the range. Test on acquisitions with illumination geometry absent from training. Check whether incidence correlates with label density in the training set, which would be the mechanism that makes the shortcut available. Inspect what the model responds to via attribution or occlusion. And offer the negative control: performance on tiles with similar illumination but no fractures should be near chance if the model is doing what you claim.",
+       cite:"Szeliski ch. 2.2, pp. 92–105, for the physical mechanism."}
+    ]
+  }
+  ]
 }
 ];
 
@@ -596,13 +1343,25 @@ const S = { view:"home", course:0, session:0, screen:0, qi:0, revealed:false, re
 let progress = {};
 
 const KEY = "groundwork:progress:v1";
-async function loadProgress(){
-  try{ const r = await window.storage.get(KEY); progress = r ? JSON.parse(r.value) : {}; }
+function loadProgress(){
+  try{ progress = JSON.parse(localStorage.getItem(KEY)) || {}; }
   catch(e){ progress = {}; }
 }
-async function saveProgress(){
-  try{ await window.storage.set(KEY, JSON.stringify(progress)); }
-  catch(e){ /* progress is a convenience, not load-bearing */ }
+function saveProgress(){
+  try{ localStorage.setItem(KEY, JSON.stringify(progress)); }
+  catch(e){ /* private browsing or storage full — progress is a convenience */ }
+}
+function exportProgress(){
+  return btoa(unescape(encodeURIComponent(JSON.stringify(progress))));
+}
+function importProgress(code){
+  try{
+    const incoming = JSON.parse(decodeURIComponent(escape(atob(code.trim()))));
+    if(typeof incoming !== "object" || incoming === null) return false;
+    Object.assign(progress, incoming);
+    saveProgress();
+    return true;
+  }catch(e){ return false; }
 }
 
 const app = document.getElementById("app");
@@ -619,12 +1378,57 @@ function render(){
   if(S.view==="read") return renderRead();
   if(S.view==="quiz") return renderQuiz();
   if(S.view==="score") return renderScore();
+  if(S.view==="transfer") return renderTransfer();
+}
+
+function renderTransfer(){
+  app.innerHTML = `<div class="mast fade"><h1>Transfer progress</h1>
+      <p>Safari and the home-screen app keep separate storage. Move progress between them here.</p></div>
+    <div class="eyebrow">Copy from this device</div>
+    <textarea id="out" readonly style="width:100%;height:96px;background:var(--surface);
+      color:var(--ink);border:1px solid var(--line);border-radius:10px;padding:12px;
+      font-family:var(--mono);font-size:12px;resize:none">${exportProgress()}</textarea>
+    <div class="eyebrow">Paste into this device</div>
+    <textarea id="in" placeholder="Paste a code here" style="width:100%;height:96px;
+      background:var(--surface);color:var(--ink);border:1px solid var(--line);border-radius:10px;
+      padding:12px;font-family:var(--mono);font-size:12px;resize:none"></textarea>
+    <p class="hint" id="msg">Pasting merges into what's already here. Nothing is overwritten.</p>`;
+  bar.innerHTML = `<div class="inner">
+    <button class="btn ghost" id="back">Back</button>
+    <button class="btn" id="apply">Apply code</button></div>`;
+  document.getElementById("out").onclick = e => e.target.select();
+  document.getElementById("back").onclick = ()=>{ S.view="home"; render(); };
+  document.getElementById("apply").onclick = ()=>{
+    const val = document.getElementById("in").value;
+    const msg = document.getElementById("msg");
+    if(!val.trim()){ msg.textContent = "Paste a code first."; return; }
+    if(importProgress(val)){ S.view="home"; render(); }
+    else msg.textContent = "That code didn't read. Copy the whole thing and try again.";
+  };
+}
+
+function courseDone(c){
+  return c.sessions.filter(s=>progress[c.id+":"+s.id]).length;
+}
+function lockedBy(c){
+  if(!c.requires) return null;
+  const req = COURSES.find(x=>x.id===c.requires);
+  if(!req) return null;
+  return courseDone(req) === req.sessions.length ? null : req;
 }
 
 function renderHome(){
   const parts = COURSES.map((c,i)=>{
     const total = c.sessions.length;
-    const done = c.sessions.filter(s=>progress[c.id+":"+s.id]).length;
+    const done = courseDone(c);
+    const lock = lockedBy(c);
+    if(lock){
+      const left = lock.sessions.length - courseDone(lock);
+      return `<div class="card locked fade">
+        <div class="n">Opens after ${lock.title}</div>
+        <h3>${c.title}</h3>
+        <p>${left} session${left===1?"":"s"} left to unlock this.</p></div>`;
+    }
     return `<button class="card fade" data-course="${i}">
       <div class="n">${done} of ${total} sessions</div>
       <h3>${c.title}</h3>
@@ -637,11 +1441,14 @@ function renderHome(){
       <p>Read on your phone. Write code at a desk.</p>
     </div>
     <div class="eyebrow">Courses</div>${parts}
-    <p class="hint">Exercises are marked but deliberately not doable here.</p>`;
+    <p class="hint">Exercises are marked but deliberately not doable here.<br>
+      <button id="xfer" style="color:var(--mint);text-decoration:underline;
+        font-family:var(--display);font-size:13px;margin-top:12px">Transfer progress</button></p>`;
   bar.innerHTML = "";
   app.querySelectorAll("[data-course]").forEach(b=>b.onclick=()=>{
     S.course=+b.dataset.course; S.view="course"; render();
   });
+  document.getElementById("xfer").onclick=()=>{ S.view="transfer"; render(); };
 }
 
 function renderCourse(){
@@ -653,6 +1460,7 @@ function renderCourse(){
       <h3>${s.title}</h3><p>${s.blurb}</p></button>`;
   }).join("");
   app.innerHTML = `<div class="mast fade"><h1>${c.title}</h1><p>${c.sub}</p></div>
+    ${c.note?`<div class="aside fade"><b>Before you start</b>${c.note}</div>`:""}
     <div class="eyebrow">Sessions</div>${items}`;
   bar.innerHTML = `<div class="inner"><button class="btn ghost" id="back">Back</button></div>`;
   document.getElementById("back").onclick=()=>{S.view="home";render();};
@@ -667,6 +1475,7 @@ function blockHTML(b){
   if(b[0]==="aside") return `<div class="aside"><b>${b[1]}</b>${b[2]}</div>`;
   if(b[0]==="desk") return `<div class="desk"><b>At a desk, not here</b>${b[1]}
     <div class="note">${b[2]||""}</div></div>`;
+  if(b[0]==="src") return `<div class="src"><b>Source</b> ${b[1]}</div>`;
   return "";
 }
 
@@ -698,7 +1507,8 @@ function renderQuiz(){
       <div class="qhead">Question ${S.qi+1} of ${s.questions.length}</div>
       <div class="q">${q.q}</div>
       ${q.prompt?`<div class="prompt">${q.prompt}</div>`:""}
-      ${S.revealed?`<div class="answer fade"><div class="lbl">A strong answer</div><p>${q.a}</p></div>`:""}
+      ${S.revealed?`<div class="answer fade"><div class="lbl">A strong answer</div><p>${q.a}</p>
+        ${q.cite?`<div class="qcite"><b>Read more</b> ${q.cite}</div>`:""}</div>`:""}
     </div>`;
   bar.innerHTML = S.revealed
     ? `<div class="inner" style="flex-direction:column;gap:8px">
@@ -747,7 +1557,8 @@ function renderScore(){
   document.getElementById("done").onclick=()=>{S.view="course";render();};
 }
 
-loadProgress().then(render);
+loadProgress();
+render();
 </script>
 </body>
 </html>
