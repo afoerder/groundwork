@@ -1,0 +1,753 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#0C1B20">
+<title>Groundwork</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ground:#0C1B20;
+  --surface:#12262D;
+  --surface-2:#183138;
+  --line:#26454E;
+  --ink:#E9E4D9;
+  --ink-dim:#9BAEB2;
+  --mint:#79D6BC;
+  --gold:#DBB166;
+  --rose:#D98A8A;
+  --display:'Space Grotesk',system-ui,sans-serif;
+  --body:'Source Serif 4',Georgia,serif;
+  --mono:'JetBrains Mono',ui-monospace,monospace;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0;background:var(--ground);color:var(--ink)}
+body{font-family:var(--body);font-size:17px;line-height:1.62;
+  padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+  overscroll-behavior-y:none}
+#app{max-width:660px;margin:0 auto;padding:0 20px 132px}
+button{font:inherit;color:inherit;background:none;border:none;cursor:pointer}
+code{font-family:var(--mono);font-size:.86em;background:var(--surface-2);
+  padding:.12em .34em;border-radius:4px;color:var(--mint);word-break:break-word}
+pre{font-family:var(--mono);font-size:13.5px;line-height:1.6;background:var(--surface);
+  border:1px solid var(--line);border-left:2px solid var(--mint);border-radius:8px;
+  padding:14px 16px;overflow-x:auto;margin:20px 0;-webkit-overflow-scrolling:touch}
+pre code{background:none;padding:0;color:var(--ink)}
+:focus-visible{outline:2px solid var(--mint);outline-offset:3px;border-radius:4px}
+
+/* ---------- masthead ---------- */
+.mast{padding:34px 0 20px}
+.mast h1{font-family:var(--display);font-weight:700;font-size:30px;letter-spacing:-.02em;
+  margin:0 0 6px}
+.mast p{margin:0;color:var(--ink-dim);font-size:15px}
+
+/* ---------- course + session cards ---------- */
+.eyebrow{font-family:var(--display);font-size:11px;font-weight:500;letter-spacing:.16em;
+  text-transform:uppercase;color:var(--mint);margin:34px 0 12px}
+.card{display:block;width:100%;text-align:left;background:var(--surface);
+  border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin-bottom:10px;
+  transition:border-color .18s,transform .12s}
+.card:active{transform:scale(.988)}
+.card .n{font-family:var(--mono);font-size:12px;color:var(--ink-dim)}
+.card h3{font-family:var(--display);font-weight:500;font-size:17px;margin:5px 0 4px;
+  letter-spacing:-.01em}
+.card p{margin:0;font-size:14px;color:var(--ink-dim);line-height:1.5}
+.card.done{border-color:var(--mint)}
+.card.done .n{color:var(--mint)}
+.card.locked{opacity:.42}
+
+/* progress rail */
+.rail{height:3px;background:var(--surface-2);border-radius:2px;margin-top:12px;overflow:hidden}
+.rail i{display:block;height:100%;background:var(--mint);border-radius:2px;
+  transition:width .4s cubic-bezier(.4,0,.2,1)}
+
+/* ---------- reading screen ---------- */
+.topbar{position:sticky;top:0;z-index:20;background:linear-gradient(var(--ground) 74%,transparent);
+  padding:14px 0 12px;display:flex;align-items:center;gap:14px}
+.topbar button{font-family:var(--display);font-size:14px;color:var(--ink-dim)}
+.ticks{flex:1;display:flex;gap:3px}
+.ticks i{flex:1;height:3px;background:var(--surface-2);border-radius:2px}
+.ticks i.on{background:var(--mint)}
+.ticks i.now{background:var(--gold)}
+
+.screen h2{font-family:var(--display);font-weight:700;font-size:23px;line-height:1.25;
+  letter-spacing:-.02em;margin:18px 0 16px}
+.screen p{margin:0 0 17px}
+.screen ul{margin:0 0 18px;padding-left:20px}
+.screen li{margin-bottom:8px}
+.screen strong{color:var(--gold);font-weight:600}
+
+.aside{border-left:2px solid var(--rose);background:rgba(217,138,138,.07);
+  padding:14px 16px;border-radius:0 8px 8px 0;margin:22px 0;font-size:15.5px}
+.aside b{font-family:var(--display);display:block;font-size:11px;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--rose);margin-bottom:7px;font-weight:500}
+
+/* ---------- desk work ---------- */
+.desk{border:1px dashed var(--line);border-radius:12px;padding:18px;margin:24px 0;
+  background:var(--surface)}
+.desk b{font-family:var(--display);display:block;font-size:11px;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--gold);margin-bottom:10px;font-weight:500}
+.desk .note{font-size:13.5px;color:var(--ink-dim);font-style:italic;margin-top:14px}
+
+/* ---------- interview ---------- */
+.qhead{font-family:var(--display);font-size:11px;letter-spacing:.16em;text-transform:uppercase;
+  color:var(--gold);margin:0 0 14px}
+.q{font-family:var(--display);font-size:20px;font-weight:500;line-height:1.4;
+  letter-spacing:-.01em;margin:0 0 20px}
+.prompt{font-size:14px;color:var(--ink-dim);margin-bottom:22px;font-style:italic}
+.answer{border-top:1px solid var(--line);padding-top:20px;margin-top:4px}
+.answer .lbl{font-family:var(--display);font-size:11px;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--mint);margin-bottom:12px}
+.grade{display:flex;gap:8px;margin-top:26px}
+.grade button{flex:1;border:1px solid var(--line);border-radius:9px;padding:13px 8px;
+  font-family:var(--display);font-size:13px;background:var(--surface)}
+.grade button.solid{background:var(--mint);color:var(--ground);border-color:var(--mint);font-weight:500}
+
+/* ---------- bottom bar ---------- */
+.bar{position:fixed;left:0;right:0;bottom:0;z-index:30;
+  background:linear-gradient(transparent,var(--ground) 26%);
+  padding:22px 20px calc(20px + env(safe-area-inset-bottom))}
+.bar .inner{max-width:660px;margin:0 auto;display:flex;gap:10px}
+.btn{flex:1;background:var(--mint);color:var(--ground);border-radius:11px;padding:15px;
+  font-family:var(--display);font-weight:500;font-size:15px;text-align:center}
+.btn.ghost{background:none;border:1px solid var(--line);color:var(--ink);flex:0 0 78px}
+.btn:active{opacity:.85}
+
+/* ---------- scorecard ---------- */
+.score{text-align:center;padding:44px 0 10px}
+.score .big{font-family:var(--display);font-size:56px;font-weight:700;letter-spacing:-.03em;
+  color:var(--mint);line-height:1}
+.score .cap{color:var(--ink-dim);font-size:14px;margin-top:8px}
+.missed{margin-top:34px}
+.missed h4{font-family:var(--display);font-size:12px;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--rose);margin:0 0 12px;font-weight:500}
+.missed li{font-size:15px;margin-bottom:9px;color:var(--ink-dim)}
+
+.fade{animation:fade .34s ease}
+@keyframes fade{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+.hint{color:var(--ink-dim);font-size:13px;text-align:center;margin:26px 0 0}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<div class="bar" id="bar"></div>
+
+<script>
+/* ============================================================
+   CURRICULUM DATA
+   Add a new course by pushing another object onto COURSES.
+   Screens: {h, body[]} where body entries are
+     "text"  |  ["code", "..."]  |  ["aside", title, text]  |  ["desk", text, note]
+   ============================================================ */
+
+const COURSES = [
+{
+  id:"fluent-python",
+  title:"Fluent Python",
+  sub:"Block 1 — The Object Model",
+  sessions:[
+
+  /* ============ SESSION 1 ============ */
+  {
+    id:"s1", n:"Session 1", title:"The Python Data Model",
+    blurb:"Types as rulebooks, dunder methods, and why a set can break silently.",
+    screens:[
+      {h:"Everything is a thing with a label", body:[
+        "When you write <code>x = 5</code>, Python creates something in memory holding the value 5. Along with the value it stores a label saying what kind of thing it is. That label says <code>int</code>.",
+        "Same with <code>name = \"Mars\"</code>. Something holds those characters and the label says <code>str</code>.",
+        "That label has a name. It's the object's <strong>type</strong>. Every value in Python has one. Numbers, text, lists, functions, the things you build yourself. Nothing floats around untyped.",
+        ["code","type(5)          # <class 'int'>\ntype(\"Mars\")     # <class 'str'>\ntype([1, 2, 3])  # <class 'list'>"],
+        "Hold onto that word. It's about to do all the work."
+      ]},
+      {h:"A type is a rulebook", body:[
+        "The type isn't just a name tag. It's a rulebook saying what this thing can do.",
+        "The <code>int</code> rulebook says you can add me, subtract me, multiply me. The <code>str</code> rulebook says you can glue me to another string, ask how long I am, loop over my characters.",
+        "Different rulebook, different abilities. That's why <code>\"cat\" + \"dog\"</code> gives <code>\"catdog\"</code> while <code>5 + 3</code> gives <code>8</code>. Same plus sign on the page. Two different rulebooks consulted."
+      ]},
+      {h:"What len() actually does", body:[
+        ["code","len([1, 2, 3])   # 3"],
+        "What did Python do?",
+        "The obvious guess: <code>len</code> is a built-in ability, Python ships knowing how to measure lists. Under that guess, if you built your own kind of thing, <code>len</code> wouldn't work on it.",
+        "That guess is wrong, and how it's wrong is the point of the session.",
+        "What actually happens: <code>len</code> looks at the object, goes to its rulebook, and looks for an entry with a specific name. That name is <code>__len__</code>, two underscores each side. If it's there, <code>len</code> runs it. If not, error.",
+        "That's the whole mechanism. <strong>len knows nothing about lists.</strong> It only knows to go looking for <code>__len__</code>."
+      ]},
+      {h:"The underscores", body:[
+        "Those double underscores are there for a plain reason. Python needed names it could reserve for itself, names that would never collide with something you'd pick. Nobody accidentally names their own function <code>__len__</code>.",
+        "People say these out loud as \"dunder,\" short for double underscore. <code>__len__</code> is \"dunder len.\" It's just slang for the underscores."
+      ]},
+      {h:"This is not one special case", body:[
+        "Once you see it for <code>len</code>, you find it everywhere. Nearly every piece of Python syntax is a disguise over one of these lookups.",
+        "<ul><li><code>a + b</code> → looks for <code>__add__</code></li><li><code>x[0]</code> → looks for <code>__getitem__</code></li><li><code>for i in x</code> → looks for <code>__iter__</code></li><li><code>print(x)</code> → looks for <code>__str__</code></li><li><code>with x:</code> → looks for <code>__enter__</code> and <code>__exit__</code></li></ul>",
+        "The plus signs and brackets are surface decoration. Underneath, all of it is Python going to the rulebook and looking up a name."
+      ]},
+      {h:"Why the design matters", body:[
+        "Most languages have a privileged inner circle. The language ships knowing its own built-in kinds of things, and those get the nice syntax. Things you build sit outside. You can't make <code>len()</code> work on your creation, so you write <code>myThing.getSize()</code>, every programmer picks a different name, nothing composes.",
+        "Python has no inner circle. A thing you define is a sequence in exactly the same way a list is, if it has the same rulebook entries. Python never checks whether something is \"really\" a list. It checks whether the entry it wants is present.",
+        "So you are not extending Python when you write these methods. <strong>You are filling in a form Python already knew how to read.</strong>"
+      ]},
+      {h:"Duck typing", body:[
+        "You'll hear that Python is \"duck typed.\" The phrase comes from an old saying: if it walks like a duck and quacks like a duck, call it a duck. Nobody checks its birth certificate.",
+        "Applied here: Python doesn't ask what your object is. It asks whether the thing it needs is there. If your object has <code>__len__</code>, <code>len()</code> works on it. Whether it's \"really\" a sequence is a question Python never asks, because there's nothing to ask. Having the entries is what being a sequence means."
+      ]},
+      {h:"Writing your own rulebook", body:[
+        "To define your own kind of thing you write a <strong>class</strong>. A class is how you write a new rulebook.",
+        ["code","class Junction:\n    def __init__(self, x, y, kind):\n        self.x = x\n        self.y = y\n        self.kind = kind"],
+        "<code>__init__</code> is another reserved name. It runs when someone makes a new <code>Junction</code>, and its job is to store the starting values. <code>self</code> refers to the particular junction being built.",
+        "Now <code>j = Junction(412, 1908, \"Y\")</code> works. You've defined a new type with one rulebook entry. Everything else is missing, and the rest of the session is what goes wrong because of that."
+      ]},
+      {h:"Problem one: it prints as garbage", body:[
+        "<code>print(j)</code> gives you something like <code>&lt;__main__.Junction object at 0x7f8b2c0d1f40&gt;</code>. That hex number is a memory address. It tells you nothing.",
+        "<code>print</code> went looking for an entry describing how to display this thing, found nothing, and fell back to the least useful possible answer. The entry it wanted is <code>__repr__</code>.",
+        ["code","def __repr__(self):\n    return f\"Junction(x={self.x}, y={self.y}, kind={self.kind!r})\""],
+        "Write <code>__repr__</code> so it looks like the code you'd type to recreate the object. Someone reading a log sees exactly what they have.",
+        ["aside","The cousin","There's also <code>__str__</code>, meant for text shown to a user rather than a programmer. If you write only one, write <code>__repr__</code> — Python falls back to it when <code>__str__</code> is missing. It doesn't work the other way. A class with only <code>__str__</code> still shows the useless hex address in the debugger, which is exactly where you needed it."]
+      ]},
+      {h:"Problem two: identical junctions aren't equal", body:[
+        ["code","a = Junction(412, 1908, \"Y\")\nb = Junction(412, 1908, \"Y\")\na == b     # False"],
+        "Same numbers, same kind, and Python says they're different.",
+        "When Python evaluates <code>a == b</code> it looks for <code>__eq__</code>. Yours doesn't have one. So it falls back to the default, and the default is: equal only if these are literally the same object in memory.",
+        "<code>a</code> and <code>b</code> are separate things holding matching values. Not the same object. So, <code>False</code>.",
+        ["aside","This is the dangerous part","It doesn't crash. It doesn't warn. Your duplicate-detection code reports zero duplicates forever and looks like it's working."],
+        ["code","def __eq__(self, other):\n    return (self.x, self.y, self.kind) == (other.x, other.y, other.kind)"]
+      ]},
+      {h:"Problem three: the set breaks", body:[
+        "A <strong>set</strong> is a collection that refuses duplicates. You'd expect <code>{a, b}</code> to hold one junction now that they're equal. Instead you get an error saying <code>Junction</code> is unhashable.",
+        "To explain that you need to know how a set works. It could check each new item against every stored item, but with a hundred thousand junctions that's a hundred thousand comparisons per insert. Sets exist to avoid exactly that.",
+        "So they use a trick. Each item is run through a function turning it into a number, called a <strong>hash</strong>. The set uses that number to pick one of many small buckets. To check for a duplicate it computes the hash, goes to that one bucket, and compares against only the few things there. Everything else is skipped without being looked at."
+      ]},
+      {h:"The contract", body:[
+        "The trick rests on one rule. <strong>If two objects are equal, they must produce the same hash.</strong>",
+        "If two equal objects hashed differently they'd land in different buckets, the set would never compare them, and it would store both. Duplicates inside a structure whose whole job is preventing duplicates. No error, no warning, just wrong.",
+        "Python guards this for you. The moment you write <code>__eq__</code> without <code>__hash__</code>, Python assumes you've changed what equality means and can no longer trust the default hash to match. So it disables hashing entirely and raises that error. It would rather stop you loudly than let the silent version happen.",
+        ["code","def __hash__(self):\n    return hash((self.x, self.y, self.kind))"],
+        "The parentheses make a tuple. Python already knows how to hash a tuple of simple values, so you borrow that instead of inventing a number scheme. Same fields in equality and in hash means the rule holds."
+      ]},
+      {h:"Exercise", body:[
+        ["desk","Write <code>Junction</code> with all four entries from an empty file. Make <code>a</code> and <code>b</code> with identical values and predict each of these before running: <code>a == b</code>, <code>a is b</code>, <code>len({a, b})</code>, <code>hash(a) == hash(b)</code>.<br><br>Then delete <code>__hash__</code> and read the error properly. Then put it back but build it from only <code>self.x</code> while equality uses all three fields — make two junctions with the same x but different kinds, put them in a set, and watch it be quietly wrong.",
+         "At a desk, no assistant. That last experiment is the exact shape of the bug class you're training to catch."]
+      ]}
+    ],
+    questions:[
+      {q:"Walk me through what actually happens when Python evaluates len(x).",
+       prompt:"Answer out loud, as if in an interview. Aim for 30 seconds.",
+       a:"<code>len</code> is not a primitive operation. Python looks at the object, goes to its type, and looks for a method named <code>__len__</code>. If it exists, that method is called and its result returned. If not, you get a <code>TypeError</code>. The consequence is that <code>len</code> has no special knowledge of lists or strings — any object implementing <code>__len__</code> works with it identically. The indirection also lets <code>len()</code> do things a raw method call can't, like produce a better error message or take a fast path for built-in types written in C."},
+      {q:"Why does Python make your class unhashable the moment you define __eq__?",
+       prompt:"The interviewer is probing whether you know the contract or just the rule.",
+       a:"Because hash-based structures rely on a contract: equal objects must have equal hashes. Sets and dicts use the hash to pick a bucket and only compare within that bucket. If you redefine equality but keep the default identity-based hash, two objects that are now equal would hash differently, land in different buckets, never be compared, and both be stored — silently defeating the purpose of the set. Python can't verify your new equality matches the old hash, so it disables hashing rather than let that happen. It fails loudly instead of silently."},
+      {q:"What's the difference between __repr__ and __str__, and which would you implement if you could only do one?",
+       prompt:"",
+       a:"<code>__repr__</code> is for developers — it's what the REPL, a debugger, and printing a container of objects will show, and by convention it should look like the code that would recreate the object. <code>__str__</code> is the user-facing display used by <code>print()</code> and f-strings. Implement <code>__repr__</code>: <code>__str__</code> falls back to it when missing, but not the reverse. A class with only <code>__str__</code> still shows a useless memory address in the debugger, which is exactly the moment you need it."},
+      {q:"Predict the output. Junction defines __eq__ over x, y, and kind, but __hash__ over x only. What does len({a, b}) return for a = Junction(5, 1, 'Y') and b = Junction(5, 2, 'T')?",
+       prompt:"Commit to a number before revealing.",
+       a:"2 — and that's the correct, unsurprising case. Both have x=5 so they hash to the same bucket, but they're not equal, so both are stored. The dangerous case is the reverse: if two objects <em>are</em> equal but hash differently, the set stores both and you get a silent duplicate. The broken-hash class only misbehaves when equality and hash disagree in that direction, which is what makes it hard to notice in testing."},
+      {q:"Someone tells you Python is duck typed. Explain what that means mechanically, not philosophically.",
+       prompt:"",
+       a:"It means the interpreter never checks an object's declared type before using it. When you write <code>for x in thing</code>, Python looks for <code>__iter__</code> on that object's type. It does not check whether the object inherits from a Sequence class or declares an interface. Having the method <em>is</em> the qualification. That's why a class you write can be a sequence, a number, or a context manager in exactly the same sense as a built-in — there's no privileged tier the language treats differently."},
+      {q:"You inherit code where a duplicate-detection step reports zero duplicates on a dataset you're confident contains them. Where do you look first?",
+       prompt:"This is a debugging question. Say your first three checks.",
+       a:"First, whether the record class defines <code>__eq__</code> at all. Without it, equality falls back to identity, so two records with identical field values are never equal and duplicates are structurally invisible. Second, if <code>__eq__</code> exists, whether <code>__hash__</code> is consistent with it — a hash built over fewer or different fields than equality can scatter equal objects across buckets. Third, whether the objects are mutated after insertion into the set or dict, since changing a field that feeds the hash strands the object in the wrong bucket. All three fail silently rather than raising."}
+    ]
+  },
+
+  /* ============ SESSION 2 ============ */
+  {
+    id:"s2", n:"Session 2", title:"Sequences",
+    blurb:"Mutable versus immutable, slicing, unpacking, comprehensions.",
+    screens:[
+      {h:"What a sequence is", body:[
+        "A <strong>sequence</strong> is anything holding items in a definite order, where you can ask for item number 3 and get a meaningful answer. Lists, tuples, and strings are all sequences.",
+        "Order is the defining property. <code>[1, 2, 3]</code> and <code>[3, 2, 1]</code> are different sequences. Later you'll meet sets and dictionaries, which hold things without a meaningful order, and the contrast is what makes sequences worth naming."
+      ]},
+      {h:"The split that matters", body:[
+        "Python's sequences divide into two camps, and this division causes more confusion than anything else in the language.",
+        "A <strong>list</strong> can be changed after you make it. The word is <strong>mutable</strong>, from the same root as mutation.",
+        ["code","readings = [4.2, 5.1, 3.8]\nreadings[0] = 9.9          # fine\nreadings.append(2.2)       # fine"],
+        "A <strong>tuple</strong> cannot. Once built, it's fixed. This is <strong>immutable</strong>.",
+        ["code","coords = (412, 1908)\ncoords[0] = 500            # TypeError"],
+        "Lists use square brackets, tuples use parentheses. But the brackets aren't the point. The point is whether the thing can change under you."
+      ]},
+      {h:"Why want the one that can't change", body:[
+        "Immutability sounds like a pure restriction. It buys three things.",
+        "<strong>It can be a dict key or set member.</strong> Hashing requires the value never change, because if it changed the hash would change and the item would sit in the wrong bucket. So Python only allows hashing for immutable things. A tuple of coordinates can be a key. A list of coordinates cannot.",
+        "<strong>Nothing can modify it behind your back.</strong> Hand a list to a function and that function can change it with no hint at the call site. Hand it a tuple and that whole class of surprise disappears. Session 5's entire subject.",
+        "<strong>It signals intent.</strong> A tuple says these values belong together as one record. A list says these are many of the same kind of thing and the count may vary."
+      ]},
+      {h:"Slicing", body:[
+        "<strong>Slicing</strong> means taking a piece of a sequence.",
+        ["code","row = [10, 11, 12, 13, 14, 15]\nrow[1:4]     # [11, 12, 13]"],
+        "Read it as \"from position 1 up to but not including position 4.\"",
+        "Two things trip everyone up. Counting starts at zero, so <code>row[1]</code> is the second item. And the end is excluded.",
+        "That exclusion looks arbitrary and isn't: <code>row[0:3]</code> and <code>row[3:6]</code> fit together with no gap and no overlap, and the length of <code>row[a:b]</code> is exactly <code>b - a</code>. Once you're cutting a raster into tiles, that property is what keeps you from off-by-one seams.",
+        ["code","row[:3]      # [10, 11, 12]\nrow[3:]      # [13, 14, 15]\nrow[::2]     # every other one\nrow[::-1]    # reversed\nrow[-1]      # last item"]
+      ]},
+      {h:"Unpacking", body:[
+        "Pull a group of values into separate names in one line:",
+        ["code","point = (412, 1908, \"Y\")\nx, y, kind = point"],
+        "Shorter than three index lookups, and it names the values, which is the real benefit. <code>x</code> says more than <code>point[0]</code>.",
+        ["code","first, *rest = [1, 2, 3, 4]   # first=1, rest=[2,3,4]\na, b = b, a                   # swap, no temp variable"],
+        "In the swap, the right side is built first as a pair, then unpacked into the left."
+      ]},
+      {h:"List comprehensions", body:[
+        "Here's the loop you'd write in most languages:",
+        ["code","squares = []\nfor n in numbers:\n    squares.append(n * n)"],
+        "Four lines, and the first and last are pure bookkeeping. Python has a one-line form:",
+        ["code","squares = [n * n for n in numbers]"],
+        "Read left to right: build a list, of <code>n * n</code>, for each <code>n</code> in <code>numbers</code>. The name comes from mathematical set-builder notation and the resemblance is deliberate.",
+        ["code","big = [n for n in numbers if n > 100]\nscaled = [n * 2 for n in numbers if n > 100]"],
+        ["aside","Two guidelines","Use a comprehension when the goal is building a new list. If the goal is a side effect — printing, writing files, updating a counter — write the plain loop. And if it needs more than about one condition and one transformation, write the loop; comprehensions stop being clearer past a certain density."]
+      ]},
+      {h:"The habit to unlearn", body:[
+        "Common in code from people coming from other languages:",
+        ["code","for i in range(len(tiles)):\n    process(tiles[i])"],
+        "Python's version:",
+        ["code","for tile in tiles:\n    process(tile)"],
+        "You almost never need the index. When you genuinely do, ask for it explicitly:",
+        ["code","for i, tile in enumerate(tiles):\n    print(f\"tile {i}: {tile}\")"]
+      ]},
+      {h:"Exercise", body:[
+        ["desk","Write a tile-manifest parser. Input is strings shaped like <code>\"ESP_012345_1234,0,0,1024,1024\"</code> — product ID, x offset, y offset, width, height.<br><br>Parse each into a tuple of five values with the four numbers converted to <code>int</code>. Use unpacking to name fields, slicing somewhere in the parse, a comprehension to build the list, and a second comprehension to filter for tiles wider than 512.",
+         "Constraint: no range(len(...)) anywhere. Then answer in a comment — why a tuple rather than a list for a parsed record?"]
+      ]}
+    ],
+    questions:[
+      {q:"When would you choose a tuple over a list? Give me a real reason, not a style preference.",
+       prompt:"",
+       a:"Three real reasons. First, hashability: only immutable objects can be dict keys or set members, so a coordinate pair as a tuple can key a lookup table while a list cannot. Second, safety across function boundaries — a tuple can't be mutated by code you hand it to, eliminating a whole class of action-at-a-distance bug. Third, it signals a fixed-shape record versus a variable-length collection, which readers pick up immediately. The rough rule: list for many of the same thing, tuple for one record with fixed parts."},
+      {q:"Why does Python exclude the end index in a slice? Defend the design.",
+       prompt:"",
+       a:"Two properties fall out of it. Adjacent slices tile without gaps or overlaps — <code>x[0:3]</code> and <code>x[3:6]</code> partition cleanly, which matters constantly when chunking arrays or rasters. And the length of <code>x[a:b]</code> is exactly <code>b - a</code>, with no off-by-one arithmetic. Combined with zero-based indexing, it means <code>x[:n]</code> gives you the first n items, which reads correctly. Inclusive-end languages force a <code>-1</code> into half your slice expressions."},
+      {q:"When is a list comprehension the wrong choice?",
+       prompt:"",
+       a:"When you're not building a list. If the loop's purpose is a side effect — writing to disk, printing, mutating external state — a comprehension is misleading because it looks like it produces a value and the reader has to work out that the result is discarded. Also when the logic is dense: multiple nested <code>for</code> clauses or several conditions make a comprehension harder to read than the equivalent loop. Comprehensions win on a single transformation with at most one filter."},
+      {q:"What's wrong with writing for i in range(len(tiles))?",
+       prompt:"An interviewer asking this wants to see whether you know Python or are writing another language in Python.",
+       a:"It builds an index you then use only to retrieve the item, so it's a longer path to the same place: <code>for tile in tiles</code> gets you the item directly. It's also more fragile, since the index gives you a second thing that can go out of sync with the container. When you genuinely need both position and item, <code>enumerate</code> gives you both explicitly, which states the intent rather than reconstructing it. The <code>range(len(...))</code> form usually signals someone translating a C or Java loop rather than expressing the operation."},
+      {q:"Explain what a, b = b, a actually does under the hood.",
+       prompt:"",
+       a:"The right-hand side is evaluated first, building a tuple containing the current values of <code>b</code> and <code>a</code>. Then that tuple is unpacked into the names on the left. Because the tuple is built before any assignment happens, neither value is clobbered mid-swap, which is why no temporary variable is needed. It's the same unpacking mechanism as <code>x, y, kind = point</code>, just with an anonymous tuple."}
+    ]
+  },
+
+  /* ============ SESSION 3 ============ */
+  {
+    id:"s3", n:"Session 3", title:"Dictionaries and Sets",
+    blurb:"Lookup by name, why it's fast, and the defaultdict trap.",
+    screens:[
+      {h:"The problem dictionaries solve", body:[
+        "A list finds things by position. Often you want to find things by name instead.",
+        "You could keep parallel lists, one of names and one of values, and search the first to get a position for the second. That's slow and easy to get out of sync.",
+        "A <strong>dictionary</strong> stores pairs directly. Each pair is a <strong>key</strong> and a <strong>value</strong>.",
+        ["code","counts = {\"T\": 412, \"Y\": 189, \"X\": 57}\ncounts[\"Y\"]        # 189"],
+        "Curly braces, pairs separated by commas, colon between key and value. Look things up with square brackets, same as a list, but with the key instead of a position."
+      ]},
+      {h:"Why lookup is fast", body:[
+        "Same trick as the set in session 1. The dictionary hashes the key to a number, uses that number to pick a bucket, and looks in only that bucket.",
+        "The consequence: finding a key takes about the same time whether the dictionary holds ten items or ten million. <strong>It doesn't scan.</strong> It computes where to look and goes straight there.",
+        "That's also why keys must be hashable, which means immutable. Strings, numbers, and tuples of those can be keys. Lists cannot. If you could use a list as a key and then modify it, its hash would change and the value would be stranded in a bucket nobody will ever check."
+      ]},
+      {h:"Sets are dicts without the values", body:[
+        "A <strong>set</strong> is the same machinery keeping only the keys. It answers one question fast: is this thing in here?",
+        ["code","seen = {\"ESP_012345\", \"ESP_012346\"}\n\"ESP_012345\" in seen     # True"],
+        "Membership in a set is fast the same way dict lookup is fast. Membership in a list is not, because a list walks its items one at a time.",
+        "That difference is real at scale. Checking each of a million items against a list of a million is a million million comparisons. Against a set it's a million fast lookups. This is the difference between an unusable script and a fast one.",
+        ["code","a | b    # union: in either\na & b    # intersection: in both\na - b    # difference: in a but not b"]
+      ]},
+      {h:"The missing key problem", body:[
+        "Ask a dictionary for a key it doesn't have and you get a <code>KeyError</code>. Usually right, but there's a pattern where it's a nuisance.",
+        "Grouping junctions by type: for each one you want to append to the list under its type. The first time you see a type, there's no list yet.",
+        ["code","groups = {}\nfor j in junctions:\n    if j.kind not in groups:\n        groups[j.kind] = []\n    groups[j.kind].append(j)"],
+        "It works, and the check is noise."
+      ]},
+      {h:"Two better ways", body:[
+        "<strong>setdefault</strong> looks up the key, and if it's missing, inserts your default and returns it:",
+        ["code","groups = {}\nfor j in junctions:\n    groups.setdefault(j.kind, []).append(j)"],
+        "<strong>defaultdict</strong> moves the decision to where the dictionary is created:",
+        ["code","from collections import defaultdict\n\ngroups = defaultdict(list)\nfor j in junctions:\n    groups[j.kind].append(j)"],
+        "You hand <code>defaultdict</code> a function that makes the default. Here that's <code>list</code>, which makes an empty list. Any missing key silently gets one on first access."
+      ]},
+      {h:"The trap", body:[
+        ["aside","Read this twice","With <code>defaultdict</code>, a typo in a key doesn't raise an error — it creates a new empty entry. And if you later check whether a key exists by looking it up, merely having asked about it creates it. Your dictionary grows keys you never meant to add, and nothing tells you."],
+        "That's a silent bug of exactly the kind you're training to spot. <code>setdefault</code> doesn't have this problem, because the default only applies where you wrote it.",
+        "Use <code>defaultdict</code> when every key legitimately gets a default. Use <code>setdefault</code> when only some do."
+      ]},
+      {h:"Exercise", body:[
+        ["desk","Group a list of <code>Junction</code> objects by kind, three ways: the <code>if not in</code> version, <code>setdefault</code>, and <code>defaultdict</code>.<br><br>Then build a set of distinct product IDs and time a membership check against a set versus a list, using a collection big enough that the difference is visible. <code>time.perf_counter()</code> is the tool.<br><br>Then demonstrate the trap deliberately: on a <code>defaultdict</code>, check <code>len()</code>, look up a key that doesn't exist, check <code>len()</code> again.",
+         "Explain in a comment what happened and why it's dangerous."]
+      ]}
+    ],
+    questions:[
+      {q:"Why is dictionary lookup fast, and what does that cost you?",
+       prompt:"",
+       a:"The dictionary hashes the key to a number and uses it to select a bucket, so it goes directly to a small candidate set instead of scanning. Lookup time is roughly constant regardless of size. The costs: keys must be hashable, which in practice means immutable, so you can't key on a list; the structure uses more memory than a compact array; and ordering is an implementation guarantee about insertion order rather than any sorted order. You also inherit the equal-objects-must-hash-equally contract from session 1."},
+      {q:"You're checking a million product IDs for membership. Why does it matter whether the collection you check against is a list or a set?",
+       prompt:"Give the scaling, not just 'sets are faster'.",
+       a:"A list checks membership by walking its elements, so each check is proportional to the list's length. A million checks against a million-element list is on the order of a trillion comparisons. A set computes a hash and inspects one bucket, so each check is roughly constant time and a million checks is a million operations. It's the difference between a job that finishes and one that doesn't. The conversion cost to build the set is linear and paid once."},
+      {q:"Talk me through the difference between setdefault and defaultdict, and when you'd pick each.",
+       prompt:"",
+       a:"<code>setdefault</code> applies a default at one specific call site: it looks the key up, inserts your default if it's absent, and returns whatever is now there. <code>defaultdict</code> moves the decision to construction — you supply a factory and every missing key gets a fresh default on any access. Use <code>defaultdict</code> when every key legitimately deserves a default, typically an accumulator. Use <code>setdefault</code> when only some accesses should create, because <code>defaultdict</code> makes a mistyped key silently succeed."},
+      {q:"What's the failure mode of defaultdict?",
+       prompt:"This is the one an interviewer uses to see if you've been bitten.",
+       a:"It never raises <code>KeyError</code>, which means it never tells you about a typo or a bad key. Worse, reading a missing key creates it — so code that merely inspects the dictionary mutates it, and a later <code>len()</code> or iteration reflects keys nobody intended to add. If you check membership with <code>in</code> that's safe, but a direct lookup is not. The bug shows up as a dictionary that's larger than expected, with empty values, and no error anywhere in the log."},
+      {q:"Why can't a list be a dictionary key?",
+       prompt:"",
+       a:"Keys must be hashable, and hashing requires the value to be stable for the object's lifetime in the dict. Lists are mutable — if you used one as a key and then appended to it, its hash would change and the entry would be stranded in a bucket the dict would never search again for it. The value would be effectively unreachable while still consuming space. Python forbids it up front by not defining <code>__hash__</code> on list, rather than allowing a corruption you'd discover much later."}
+    ]
+  },
+
+  /* ============ SESSION 4 ============ */
+  {
+    id:"s4", n:"Session 4", title:"Data Class Builders",
+    blurb:"NamedTuple, dataclass, frozen dataclass, and choosing between them.",
+    screens:[
+      {h:"The observation", body:[
+        "Look back at your <code>Junction</code>. Most of it was boilerplate. You wrote <code>__init__</code> to store three fields, <code>__repr__</code> to print three fields, <code>__eq__</code> to compare three fields, <code>__hash__</code> to hash three fields.",
+        "Four methods, all saying \"there are three fields and here they are.\"",
+        "That pattern is common enough that Python generates it for you. This session is three ways to do that and when each is right."
+      ]},
+      {h:"Option one: NamedTuple", body:[
+        "A tuple with names on its positions.",
+        ["code","from typing import NamedTuple\n\nclass Junction(NamedTuple):\n    x: int\n    y: int\n    kind: str"],
+        "That's the whole class. You get <code>__init__</code>, <code>__repr__</code>, <code>__eq__</code>, and <code>__hash__</code> free, plus everything a tuple does.",
+        ["code","j = Junction(412, 1908, \"Y\")\nj.x            # 412\nj[0]           # 412, still a tuple\nx, y, kind = j # unpacking works"],
+        "It's immutable, because it's a tuple. Which also means hashable, so it goes in a set with no extra work."
+      ]},
+      {h:"About those type hints", body:[
+        "The <code>: int</code> and <code>: str</code> markers are <strong>type hints</strong> — notes saying what kind of value each field should hold.",
+        "Python does not enforce them at runtime. You can pass a string where <code>int</code> was declared and nothing stops you. They exist for readers and for separate checking tools, which is session 8's whole subject.",
+        "<code>NamedTuple</code> is unusual in that it reads the hints to learn what the fields are, so here they're structurally required rather than optional documentation."
+      ]},
+      {h:"Option two: dataclass", body:[
+        ["code","from dataclasses import dataclass\n\n@dataclass\nclass Junction:\n    x: int\n    y: int\n    kind: str"],
+        "Nearly identical to write, meaningfully different in behavior.",
+        "The <code>@dataclass</code> line is a <strong>decorator</strong>. The <code>@</code> means \"take the class defined below, hand it to this function, use what comes back.\" <code>dataclass</code> reads your field declarations and writes the methods. Session 9 covers how decorators work; for now treat it as a marker requesting generated methods."
+      ]},
+      {h:"Two differences that matter", body:[
+        "<strong>It's mutable by default.</strong> <code>j.x = 500</code> works. Which means it's <em>not</em> hashable by default, for the session 1 reason: Python won't hash something whose value can change. If you want it fixed, say so:",
+        ["code","@dataclass(frozen=True)\nclass Junction:\n    ..."],
+        "<strong>It's not a tuple.</strong> No indexing, no unpacking, no iteration. That sounds like a loss and is often a gain — if the object is a record, being able to write <code>j[0]</code> invites position-based access that breaks the moment you add a field.",
+        "Dataclasses also accept defaults, computed fields, and post-init processing, none of which <code>NamedTuple</code> handles cleanly."
+      ]},
+      {h:"Option three: write it yourself", body:[
+        "Still right sometimes. When your class needs real behavior — validation on construction, methods doing actual work, careful control of equality — the generated versions stop fitting.",
+        "The mistake is reaching for the plain class first out of habit. Start with a builder and drop down when it stops serving."
+      ]},
+      {h:"Choosing", body:[
+        "<ul><li>Fixed record, want it hashable, unpacking is natural → <code>NamedTuple</code></li><li>Record with defaults or fields you'll modify → <code>@dataclass</code></li><li>Record you want fixed but not tuple-like → <code>@dataclass(frozen=True)</code></li><li>Real behavior beyond holding data → plain class</li></ul>",
+        "The mutability question is the one that actually decides it, and it's what session 5 is about."
+      ]},
+      {h:"Exercise", body:[
+        ["desk","Rewrite <code>Junction</code> three ways: <code>NamedTuple</code>, plain <code>@dataclass</code>, <code>@dataclass(frozen=True)</code>.<br><br>For each, test the same five things: does <code>==</code> compare by value, does <code>hash()</code> work, can you put two in a set, can you modify a field, can you unpack it into three names. Make a table.",
+         "Then argue in a paragraph which you'd use for junction records in your own pipeline, and note which you'd pick for a mutable config object and why that's a different answer."]
+      ]}
+    ],
+    questions:[
+      {q:"NamedTuple or dataclass — how do you decide?",
+       prompt:"",
+       a:"The deciding question is mutability. <code>NamedTuple</code> is immutable and therefore hashable for free, supports unpacking and indexing, and is a tuple underneath — good for a fixed record you want in sets or as dict keys. <code>@dataclass</code> is mutable by default, not hashable unless frozen, and is not a tuple, so no indexing or unpacking. Dataclass wins when you need defaults, post-init computation, or fields you'll modify. If I want fixed-but-not-tuple-like, <code>@dataclass(frozen=True)</code>."},
+      {q:"Why is a plain @dataclass not hashable, and what does frozen=True actually change?",
+       prompt:"",
+       a:"A plain dataclass generates <code>__eq__</code> but leaves it mutable, and Python's rule from session 1 applies: defining <code>__eq__</code> without <code>__hash__</code> sets <code>__hash__</code> to <code>None</code>. That's correct here, because a mutable object's hash could change after insertion into a set and strand it in the wrong bucket. <code>frozen=True</code> blocks attribute assignment after construction, which makes the value stable, so the dataclass machinery can safely generate a <code>__hash__</code> alongside <code>__eq__</code>."},
+      {q:"Do type hints in a dataclass enforce anything at runtime?",
+       prompt:"",
+       a:"No. Passing a string where <code>int</code> is declared constructs the object without complaint. The hints are read by the dataclass machinery to discover field names and by external tools like mypy to check consistency before you run. The one nuance is that the annotation is what makes something a field at all — an attribute without an annotation isn't picked up as a dataclass field, which is a subtle source of confusion."},
+      {q:"When would you skip all three builders and write the class by hand?",
+       prompt:"",
+       a:"When the class has real behavior rather than being a record — validation that must run on construction, invariants across fields, methods doing substantive work, or equality semantics that don't follow from comparing all fields. Also when you need tight control over the constructor signature or want to avoid generated methods you'd immediately override. The failure mode to avoid is the reverse: reaching for a hand-written class by habit when a dataclass would express the same thing in four lines."}
+    ]
+  },
+
+  /* ============ SESSION 5 ============ */
+  {
+    id:"s5", n:"Session 5", title:"References and Mutability",
+    blurb:"The most important session in the block. Every bug here runs cleanly and gives wrong answers.",
+    screens:[
+      {h:"Variables are labels, not boxes", body:[
+        "Most people picture <code>x = 5</code> as a box named <code>x</code> with 5 inside. That picture is wrong in Python, and every bug in this session comes from it.",
+        "The right picture: the object exists somewhere in memory, and the name is a label stuck onto it.",
+        "The difference shows up immediately when two labels go on one object:",
+        ["code","a = [1, 2, 3]\nb = a"],
+        "Under the box picture, <code>b</code> is a second box with its own copy. Under the label picture, <code>b</code> is a second label on the same list. <strong>There is one list with two names.</strong>",
+        ["code","b.append(4)\na          # [1, 2, 3, 4]"],
+        "You never touched <code>a</code>. It changed, because <code>a</code> and <code>b</code> were always the same list. This is <strong>aliasing</strong>."
+      ]},
+      {h:"Which situation are you in?", body:[
+        ["code","a is b     # True: same object\na == b     # True: equal values"],
+        "<code>is</code> asks whether they're the same object. <code>==</code> asks whether they're equal.",
+        "Two lists with matching contents are <code>==</code> but not <code>is</code>. Two names for one list are both. When debugging this class of bug, <code>is</code> is the diagnostic and <code>id(a)</code> is the confirmation."
+      ]},
+      {h:"Why immutability was worth it", body:[
+        ["code","a = (1, 2, 3)\nb = a"],
+        "Two labels, one tuple. Doesn't matter. Nothing can modify a tuple, so <code>b</code> cannot affect what <code>a</code> sees.",
+        "<strong>Aliasing only bites with mutable objects.</strong> Which is why \"prefer immutable when you can\" is real engineering advice rather than style preference."
+      ]},
+      {h:"Functions receive labels", body:[
+        "This is where it gets expensive.",
+        ["code","def normalize(readings):\n    readings.sort()\n    return readings"],
+        "Call it with a list and you didn't give the function a copy. You gave it another label on your list. <code>sort()</code> rearranges in place. Your original is now sorted, permanently.",
+        ["code","data = [3, 1, 2]\nresult = normalize(data)\ndata       # [1, 2, 3]"],
+        ["aside","The pattern to internalize","A function taking a mutable argument can change it, and the call site gives you no hint. Reading <code>normalize(data)</code> tells you nothing about whether <code>data</code> survives."]
+      ]},
+      {h:"Two honest ways to handle it", body:[
+        "Don't modify the input, work on a copy:",
+        ["code","def normalized(readings):\n    return sorted(readings)   # new list"],
+        "Or modify deliberately and say so, by name and by returning nothing:",
+        ["code","def sort_in_place(readings):\n    readings.sort()"],
+        "A function returning <code>None</code> is a strong hint it worked by mutation. That's exactly why <code>list.sort()</code> returns <code>None</code> while <code>sorted()</code> returns a new list. Verb for mutation, adjective or noun for the copy."
+      ]},
+      {h:"Copies come in two depths", body:[
+        "A <strong>shallow copy</strong> makes a new outer container holding the same inner objects:",
+        ["code","original = [[1, 2], [3, 4]]\ncopy = list(original)\n\ncopy is original           # False\ncopy[0] is original[0]     # True"],
+        ["code","copy[0].append(99)\noriginal                   # [[1, 2, 99], [3, 4]]"],
+        "You copied, and it still leaked. <code>list()</code>, slicing, and <code>.copy()</code> are all shallow.",
+        "A <strong>deep copy</strong> recursively copies everything inside:",
+        ["code","import copy\nindependent = copy.deepcopy(original)"],
+        "Slower, and occasionally impossible for objects holding things like file handles, so it isn't a blanket default. But nested structures are where shallow copying is a trap, and pipeline configs and grouped results are usually nested."
+      ]},
+      {h:"The mutable default argument", body:[
+        "The single most notorious bug in Python.",
+        ["code","def collect(item, bucket=[]):\n    bucket.append(item)\n    return bucket"],
+        "Looks like each call with no bucket starts fresh. It does not.",
+        ["code","collect(1)      # [1]\ncollect(2)      # [1, 2]\ncollect(3)      # [1, 2, 3]"],
+        "The reason follows from everything above. <strong>Default values are evaluated once, when the function is defined</strong>, not on each call. That one list is created at definition and lives as long as the function does. Every call using the default gets the same list.",
+        ["code","def collect(item, bucket=None):\n    if bucket is None:\n        bucket = []\n    bucket.append(item)\n    return bucket"],
+        "Never use a mutable object as a default argument. Lists, dicts, and sets as defaults are always wrong."
+      ]},
+      {h:"Garbage collection, briefly", body:[
+        "The \"recycling\" in the chapter title. Python tracks how many labels point at each object. When the count hits zero, nothing can reach it and the memory is freed automatically.",
+        "Two practical consequences. You don't free memory manually. And an object stays alive as long as anything references it — which is why appending results to a list you never clear, in a long-running loop, shows up as memory climbing until the job dies. That's not a leak in the classical sense. It's an object you're still pointing at."
+      ]},
+      {h:"Exercise", body:[
+        ["desk","Five parts. (1) Three functions that modify a list argument in place, three that return a new one, named so the difference is obvious at the call site. (2) Demonstrate aliasing and prove it with <code>is</code> and <code>id()</code>. (3) Build a nested structure, shallow copy it, show the leak, then deep copy and show it's clean. (4) Write the mutable default bug, show accumulation over three calls, then fix it.<br><br>(5) Write a function that plausibly belongs in your own pipeline — takes a list of junction records and a config dict — and mutates one of them by accident in a way that looks completely reasonable. Then write the assertion that catches it.",
+         "Part five is the actual skill. Not knowing aliasing exists, but seeing it in code that reads as fine."]
+      ]}
+    ],
+    questions:[
+      {q:"Explain what happens in memory when you write b = a, where a is a list.",
+       prompt:"",
+       a:"No copying happens. Names in Python are labels bound to objects, not boxes containing values. <code>b = a</code> binds a second name to the same list object, so <code>a is b</code> is <code>True</code> and they share one identity. Any mutation through either name is visible through the other. This is aliasing. It's harmless for immutable objects, since nothing can change them, and it's the source of most silent state bugs for mutable ones."},
+      {q:"Why does list.sort() return None while sorted() returns a list? Is that inconsistent?",
+       prompt:"",
+       a:"It's a deliberate convention, not an inconsistency. <code>sort()</code> mutates the list in place, and returning <code>None</code> signals that — it also prevents chaining that would falsely suggest a new object was produced. <code>sorted()</code> leaves its input alone and returns a new list. The naming carries the distinction too: verb for the mutating version, past participle or noun for the copying version. Following the same convention in your own code tells a reader at the call site whether their data survives."},
+      {q:"Walk me through why this accumulates: def collect(item, bucket=[]).",
+       prompt:"",
+       a:"Default argument values are evaluated once, at function definition time, not on each call. So one list object is created when the <code>def</code> executes and is stored on the function. Every call that omits <code>bucket</code> binds the parameter to that same object, and appends accumulate across calls. The fix is a sentinel: default to <code>None</code>, and create a fresh list inside the body when the argument is <code>None</code>. The rule generalizes to any mutable default — lists, dicts, sets."},
+      {q:"You copy a config dictionary before passing it to a function, and the original still gets modified. What happened?",
+       prompt:"",
+       a:"The copy was shallow. <code>dict(cfg)</code>, <code>cfg.copy()</code>, and slicing all produce a new outer container that holds references to the same inner objects. If the config has nested dicts or lists — which most do — mutating a nested value through the copy is visible through the original, because they're the same nested object. The fix is <code>copy.deepcopy()</code>, or better, making the config immutable so the question can't arise."},
+      {q:"How would you catch an accidental in-place mutation in a function you didn't write?",
+       prompt:"An interviewer is testing whether you can audit code, not just write it.",
+       a:"Snapshot before and compare after. Take a deep copy of the input, call the function, then assert the input still equals the snapshot — that catches mutation regardless of where it happened. For identity questions specifically, compare <code>id()</code> or use <code>is</code> to distinguish rebinding from mutation. Structurally, the stronger fix is to pass immutable data where possible, so the failure becomes an exception at the mutation site instead of a silent difference discovered downstream."}
+    ]
+  },
+
+  /* ============ SESSION 6 ============ */
+  {
+    id:"s6", n:"Session 6", title:"Consolidation",
+    blurb:"No new material. Convert recognition into retrieval.",
+    screens:[
+      {h:"What this session is for", body:[
+        "Five sessions of new material is enough that some of it hasn't set. This session converts it from recognized to retrievable, which are different states.",
+        "You can recognize <code>defaultdict</code> when you read it and still not produce it from an empty file. <strong>Only the second one counts.</strong>"
+      ]},
+      {h:"The task", body:[
+        "Take the record model from <code>TYXNLabeler</code> — the class or classes representing a junction, a label, an annotation record, whatever the core data object is — and rewrite it cold. No assistant, no looking at the original until you're done.",
+        ["desk","Constraints:<br>• Choose deliberately between <code>NamedTuple</code>, <code>dataclass</code>, <code>frozen dataclass</code>, and a plain class, and justify it in one sentence.<br>• Whatever holds records must behave properly in a set and as a dict key, or you must explain why it shouldn't.<br>• Any function taking a collection is explicit about mutating or not, in name and return value.<br>• No mutable default arguments.<br>• At least one grouping operation, with a comment on why you chose <code>defaultdict</code> or <code>setdefault</code>.<br>• No <code>range(len(...))</code>.",
+         "Cold means cold. Close the original file."]
+      ]},
+      {h:"After it runs", body:[
+        "Diff against the original. Three questions.",
+        "<strong>Where did you stall</strong>, and was it a gap in knowing Python or a gap in remembering what the code was supposed to do? Only the first kind is this curriculum's problem.",
+        "<strong>What did the original do that yours doesn't</strong>, and is that a genuine improvement or leftover complexity?",
+        "<strong>What does yours do better?</strong> After five sessions on the object model there should be at least one place where you now see a cleaner structure than what's there."
+      ]},
+      {h:"Then, and only then", body:[
+        "Open Claude, paste your version, and ask what it would change.",
+        "The order is the point. You've already produced the thing. Now the model is reviewing your work instead of writing it, which is the working relationship you're building.",
+        "Write down anything it suggests that you didn't know existed. That list is your personal gap inventory, and it's better targeted than any curriculum could be."
+      ]}
+    ],
+    questions:[
+      {q:"Tell me about a bug you've hit that ran without error but produced wrong results.",
+       prompt:"This comes up in almost every applied scientist interview. Have a real one ready.",
+       a:"No model answer — this one is yours. A strong version names the mechanism, not just the symptom: what the code did, why nothing raised, how you noticed, and what check you added so the class of bug can't recur silently. If you don't have one yet, the exercises in sessions 1, 3, and 5 each manufacture one deliberately. Use one of those until you have a better story from your own work."},
+      {q:"You're handed a colleague's data pipeline. What are the first things you check before trusting its output?",
+       prompt:"",
+       a:"Whether record types define <code>__eq__</code> and a consistent <code>__hash__</code>, since dedup and grouping silently fail without them. Whether functions mutate their arguments, and whether callers depend on the original surviving. Whether any defaults are mutable. Whether copies are shallow where the data is nested. Beyond the language: whether the train/validation split is genuinely independent, and whether any normalization statistic was computed across the whole dataset rather than the training portion, which leaks and inflates results with no error anywhere."},
+      {q:"Someone says they'd rather write a plain class than use a dataclass. Argue both sides.",
+       prompt:"",
+       a:"For the plain class: full control over the constructor, no generated methods to work around, natural home for validation and invariants, and no dependency on decorator behavior a reader might not know. For the dataclass: four lines instead of thirty, generated methods that are correct by construction rather than hand-written and subtly inconsistent, and a clear signal to readers that this is a record. The real answer is that the choice should follow whether the type has behavior or just holds data, and defaulting to the hand-written version out of habit costs you correctness on <code>__eq__</code> and <code>__hash__</code> more often than people expect."}
+    ]
+  }
+  ]
+}
+];
+
+/* ============================================================
+   STATE
+   ============================================================ */
+const S = { view:"home", course:0, session:0, screen:0, qi:0, revealed:false, results:[] };
+let progress = {};
+
+const KEY = "groundwork:progress:v1";
+async function loadProgress(){
+  try{ const r = await window.storage.get(KEY); progress = r ? JSON.parse(r.value) : {}; }
+  catch(e){ progress = {}; }
+}
+async function saveProgress(){
+  try{ await window.storage.set(KEY, JSON.stringify(progress)); }
+  catch(e){ /* progress is a convenience, not load-bearing */ }
+}
+
+const app = document.getElementById("app");
+const bar = document.getElementById("bar");
+const esc = s => s;
+
+/* ============================================================
+   RENDER
+   ============================================================ */
+function render(){
+  window.scrollTo(0,0);
+  if(S.view==="home") return renderHome();
+  if(S.view==="course") return renderCourse();
+  if(S.view==="read") return renderRead();
+  if(S.view==="quiz") return renderQuiz();
+  if(S.view==="score") return renderScore();
+}
+
+function renderHome(){
+  const parts = COURSES.map((c,i)=>{
+    const total = c.sessions.length;
+    const done = c.sessions.filter(s=>progress[c.id+":"+s.id]).length;
+    return `<button class="card fade" data-course="${i}">
+      <div class="n">${done} of ${total} sessions</div>
+      <h3>${c.title}</h3>
+      <p>${c.sub}</p>
+      <div class="rail"><i style="width:${total?done/total*100:0}%"></i></div>
+    </button>`;
+  }).join("");
+  app.innerHTML = `<div class="mast fade">
+      <h1>Groundwork</h1>
+      <p>Read on your phone. Write code at a desk.</p>
+    </div>
+    <div class="eyebrow">Courses</div>${parts}
+    <p class="hint">Exercises are marked but deliberately not doable here.</p>`;
+  bar.innerHTML = "";
+  app.querySelectorAll("[data-course]").forEach(b=>b.onclick=()=>{
+    S.course=+b.dataset.course; S.view="course"; render();
+  });
+}
+
+function renderCourse(){
+  const c = COURSES[S.course];
+  const items = c.sessions.map((s,i)=>{
+    const done = progress[c.id+":"+s.id];
+    return `<button class="card ${done?"done":""}" data-s="${i}">
+      <div class="n">${s.n}${done?" · "+done.score+"/"+done.total:""}</div>
+      <h3>${s.title}</h3><p>${s.blurb}</p></button>`;
+  }).join("");
+  app.innerHTML = `<div class="mast fade"><h1>${c.title}</h1><p>${c.sub}</p></div>
+    <div class="eyebrow">Sessions</div>${items}`;
+  bar.innerHTML = `<div class="inner"><button class="btn ghost" id="back">Back</button></div>`;
+  document.getElementById("back").onclick=()=>{S.view="home";render();};
+  app.querySelectorAll("[data-s]").forEach(b=>b.onclick=()=>{
+    S.session=+b.dataset.s; S.screen=0; S.view="read"; render();
+  });
+}
+
+function blockHTML(b){
+  if(typeof b === "string") return `<p>${b}</p>`;
+  if(b[0]==="code") return `<pre><code>${b[1].replace(/&/g,"&amp;").replace(/</g,"&lt;")}</code></pre>`;
+  if(b[0]==="aside") return `<div class="aside"><b>${b[1]}</b>${b[2]}</div>`;
+  if(b[0]==="desk") return `<div class="desk"><b>At a desk, not here</b>${b[1]}
+    <div class="note">${b[2]||""}</div></div>`;
+  return "";
+}
+
+function renderRead(){
+  const c = COURSES[S.course], s = c.sessions[S.session], sc = s.screens[S.screen];
+  const ticks = s.screens.map((_,i)=>
+    `<i class="${i<S.screen?"on":i===S.screen?"now":""}"></i>`).join("");
+  app.innerHTML = `<div class="topbar"><button id="x">Close</button><div class="ticks">${ticks}</div></div>
+    <div class="screen fade"><h2>${sc.h}</h2>${sc.body.map(blockHTML).join("")}</div>`;
+  const last = S.screen === s.screens.length-1;
+  bar.innerHTML = `<div class="inner">
+    ${S.screen>0?`<button class="btn ghost" id="prev">Back</button>`:""}
+    <button class="btn" id="next">${last?"Start questions":"Continue"}</button></div>`;
+  document.getElementById("x").onclick=()=>{S.view="course";render();};
+  const p=document.getElementById("prev"); if(p) p.onclick=()=>{S.screen--;render();};
+  document.getElementById("next").onclick=()=>{
+    if(last){ S.qi=0; S.revealed=false; S.results=[]; S.view="quiz"; }
+    else S.screen++;
+    render();
+  };
+}
+
+function renderQuiz(){
+  const c = COURSES[S.course], s = c.sessions[S.session], q = s.questions[S.qi];
+  const ticks = s.questions.map((_,i)=>
+    `<i class="${i<S.qi?"on":i===S.qi?"now":""}"></i>`).join("");
+  app.innerHTML = `<div class="topbar"><button id="x">Close</button><div class="ticks">${ticks}</div></div>
+    <div class="screen fade">
+      <div class="qhead">Question ${S.qi+1} of ${s.questions.length}</div>
+      <div class="q">${q.q}</div>
+      ${q.prompt?`<div class="prompt">${q.prompt}</div>`:""}
+      ${S.revealed?`<div class="answer fade"><div class="lbl">A strong answer</div><p>${q.a}</p></div>`:""}
+    </div>`;
+  bar.innerHTML = S.revealed
+    ? `<div class="inner" style="flex-direction:column;gap:8px">
+         <div style="font-family:var(--display);font-size:12px;letter-spacing:.14em;
+           text-transform:uppercase;color:var(--ink-dim);text-align:center">How did you do?</div>
+         <div class="grade">
+           <button data-g="0">Missed it</button>
+           <button data-g="1">Partly</button>
+           <button data-g="2" class="solid">Had it</button>
+         </div></div>`
+    : `<div class="inner"><button class="btn" id="reveal">Show a strong answer</button></div>`;
+  document.getElementById("x").onclick=()=>{S.view="course";render();};
+  const r=document.getElementById("reveal");
+  if(r) r.onclick=()=>{S.revealed=true;render();};
+  bar.querySelectorAll("[data-g]").forEach(b=>b.onclick=()=>{
+    S.results.push({q:q.q, g:+b.dataset.g});
+    if(S.qi === s.questions.length-1){ S.view="score"; finish(); }
+    else { S.qi++; S.revealed=false; }
+    render();
+  });
+}
+
+function finish(){
+  const c = COURSES[S.course], s = c.sessions[S.session];
+  const score = S.results.filter(r=>r.g===2).length;
+  progress[c.id+":"+s.id] = {score, total:s.questions.length, at:Date.now()};
+  saveProgress();
+}
+
+function renderScore(){
+  const c = COURSES[S.course], s = c.sessions[S.session];
+  const score = S.results.filter(r=>r.g===2).length;
+  const weak = S.results.filter(r=>r.g<2);
+  app.innerHTML = `<div class="score fade">
+      <div class="big">${score}/${S.results.length}</div>
+      <div class="cap">${s.n} · ${s.title}</div>
+    </div>
+    ${weak.length?`<div class="missed fade"><h4>Worth another pass</h4><ul>
+      ${weak.map(w=>`<li>${w.q}</li>`).join("")}</ul></div>`:
+      `<p class="hint">Clean sweep. Do the desk exercise before moving on — recall and production are different skills.</p>`}`;
+  bar.innerHTML = `<div class="inner">
+    <button class="btn ghost" id="again">Retry</button>
+    <button class="btn" id="done">Back to sessions</button></div>`;
+  document.getElementById("again").onclick=()=>{
+    S.qi=0;S.revealed=false;S.results=[];S.view="quiz";render();};
+  document.getElementById("done").onclick=()=>{S.view="course";render();};
+}
+
+loadProgress().then(render);
+</script>
+</body>
+</html>
